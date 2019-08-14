@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.hbisoft.hbrecorder">
+
+
+    <application>
+        <service android:name="com.hbisoft.hbrecorder.ScreenRecordService"/>
+
+        <receiver android:name="com.hbisoft.hbrecorder.NotificationReceiver"/>
+
+    </application>
+
+</manifest>

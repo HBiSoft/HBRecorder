@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">HBRecorderExample</string>
+    <string name="start_recording">START</string>
+    <string name="stop_recording">STOP</string>
+    <string name="record_audio">Record Audio</string>
+    <string name="high_definition">High Definition</string>
+    <string name="standard_definition">Standard Definition</string>
+    <string name="show_notification">Show Notification</string>
+</resources>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/main_background"
+    tools:ignore="Overdraw">
+
+    <RadioGroup
+        android:layout_marginTop="50dp"
+        android:id="@+id/radio_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/hd_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/high_definition"
+            android:textColor="@android:color/white" />
+
+        <androidx.appcompat.widget.AppCompatRadioButton
+            android:id="@+id/sd_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/standard_definition"
+            android:buttonTint="@android:color/white"
+            android:textColor="@android:color/white"/>
+
+    </RadioGroup>
+
+
+    <CheckBox
+        android:id="@+id/audio_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/radio_group"
+        android:layout_below="@+id/radio_group"
+        android:layout_marginTop="30dp"
+        android:checked="true"
+        android:text="@string/record_audio"
+        android:textColor="@android:color/white"
+        app:theme="@style/CheckboxStyle"
+        />
+
+    <CheckBox
+        android:id="@+id/notification_check_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/radio_group"
+        android:layout_below="@+id/audio_check_box"
+        android:layout_marginTop="10dp"
+        android:checked="false"
+        android:text="@string/show_notification"
+        android:textColor="@android:color/white"
+        app:theme="@style/CheckboxStyle"
+        />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorPrimary">
+
+        <Button
+            android:id="@+id/button_start"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start_recording"
+            android:textColor="@android:color/white"
+            android:background="@drawable/ripple_effect"
+            tools:text="@string/start_recording"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
