@@ -159,21 +159,6 @@ public class HBRecorder implements MyListener {
         observer = new FileObserver(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)), activity, HBRecorder.this);
         observer.startWatching();
 
-        if (audioBitrate == 0){
-            audioBitrate = 128000;
-        }
-        if (audioSamplingRate == 0){
-            audioSamplingRate = 44100;
-        }
-
-        if (notificationTitle.equals("")){
-            notificationTitle = "Recording your screen";
-        }
-
-        if (notificationDescription.equals("")){
-            notificationDescription = "Drag down to stop the recording";
-        }
-
         Intent service = new Intent(context, ScreenRecordService.class);
         service.putExtra("code", resultCode);
         service.putExtra("data", data);

@@ -63,9 +63,37 @@ public class ScreenRecordService extends Service {
         String notificationDescription = intent.getStringExtra("notificationDescription");
         boolean shouldShowNotification = intent.getBooleanExtra("shouldShowNotification", true);
         String notificationButtonText = intent.getStringExtra("notificationButtonText");
+        mResultCode = intent.getIntExtra("code", -1);
+        mResultData = intent.getParcelableExtra("data");
+        mScreenWidth = intent.getIntExtra("width", 720);
+        mScreenHeight = intent.getIntExtra("height", 1280);
+        mScreenDensity = intent.getIntExtra("density", 1);
+        isVideoHD = intent.getBooleanExtra("quality", true);
+        isAudioEnabled = intent.getBooleanExtra("audio", true);
+        path = intent.getStringExtra("path");
+        name = intent.getStringExtra("fileName");
+
+        filePath = name;
+        audioBitrate = intent.getIntExtra("audioBitrate", 128000);
+        audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
 
         if (notificationButtonText==null){
             notificationButtonText = "STOP RECORDING";
+        }
+
+        if (audioBitrate == 0){
+            audioBitrate = 128000;
+        }
+        if (audioSamplingRate == 0){
+            audioSamplingRate = 44100;
+        }
+
+        if (notificationTitle == null || notificationTitle.equals("")){
+            notificationTitle = "Recording your screen";
+        }
+
+        if (notificationDescription == null || notificationDescription.equals("")){
+            notificationDescription = "Drag down to stop the recording";
         }
 
         //Check if notification should be shown
@@ -110,19 +138,6 @@ public class ScreenRecordService extends Service {
          *   Notification End
          */
 
-        mResultCode = intent.getIntExtra("code", -1);
-        mResultData = intent.getParcelableExtra("data");
-        mScreenWidth = intent.getIntExtra("width", 720);
-        mScreenHeight = intent.getIntExtra("height", 1280);
-        mScreenDensity = intent.getIntExtra("density", 1);
-        isVideoHD = intent.getBooleanExtra("quality", true);
-        isAudioEnabled = intent.getBooleanExtra("audio", true);
-        path = intent.getStringExtra("path");
-        name = intent.getStringExtra("fileName");
-
-        filePath = name;
-        audioBitrate = intent.getIntExtra("audioBitrate", 128000);
-        audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
 
         if (path == null) {
             path = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
