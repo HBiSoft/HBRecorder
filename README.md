@@ -12,10 +12,10 @@ Lightweight screen and audio capturing Android library
 Add the following in your root build.gradle at the end of repositories:
 
     allprojects {
-		    repositories {
-			      ...
-			      maven { url 'https://jitpack.io' }
-		    }
+        repositories {
+	    ...
+	    maven { url 'https://jitpack.io' }
+	}
     }
     
 Implement library in your app level build.gradle:
@@ -29,37 +29,37 @@ Implement library in your app level build.gradle:
 --- 
 1. In your `Activity`, first implement `HBRecorder`, as shown below:
 
-    public class MainActivity extends AppCompatActivity implements HBRecorderListener {
+        public class MainActivity extends AppCompatActivity implements HBRecorderListener {
     
 2. `Alt+Enter` to implement the following method:
 
-    @Override
-    public void HBRecorderOnComplete() {
-        //This is called once the file was created
-    }
+        @Override
+        public void HBRecorderOnComplete() {
+            //This is called once the file was created
+        }
     
 3. Init `HBRecorder` as shown below:
 
-    public class MainActivity extends AppCompatActivity implements HBRecorderListener {
-        HBRecorder hbRecorder;
+        public class MainActivity extends AppCompatActivity implements HBRecorderListener {
+            HBRecorder hbRecorder;
     
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setContentView(R.layout.activity_main);     
+            @Override
+            protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                setContentView(R.layout.activity_main);     
 
-            //Init HBRecorder
-            hbRecorder = new HBRecorder(this, this);        
+                //Init HBRecorder
+                hbRecorder = new HBRecorder(this, this);        
 
-    }
+        }
     
 4. Add the following permissions in your manifest:
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <!--This is only necessary if you are displaying notifications-->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+        <uses-permission android:name="android.permission.RECORD_AUDIO" />
+        <!--This is only necessary if you are displaying notifications-->
+        <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 </br>    
 That's it `HBRecorder` is now ready to be used.
 
