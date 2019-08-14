@@ -21,7 +21,7 @@ Add the following in your root build.gradle at the end of repositories:
 Implement library in your app level build.gradle:
 
     dependencies {
-	      implementation 'com.github.HBiSoft:HBRecorder:Tag'
+	      implementation 'com.github.HBiSoft:HBRecorder:0.1.0'
 	  }
     
 
