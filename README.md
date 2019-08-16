@@ -11,7 +11,7 @@ Lightweight screen and audio capturing Android library
 ---
 Add the following in your root build.gradle at the end of repositories:
 
-``java
+```java
 allprojects {
     repositories {
         ...
