@@ -6,6 +6,14 @@ Lightweight screen and audio capturing Android library
 
 **Requires API level 21>**
 
+Demo:
+---
+
+Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.2/HBRecorderDemo.apk)
+
+</br>
+
+<image src="https://media.giphy.com/media/Rhdoa8i9kVZXDFXYd9/giphy.gif" width="247" height="480" >
 
 **Adding the library to your project:**
 ---
