@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     //Reference to checkboxes and radio buttons
     boolean wasHDSelected = true;
     boolean isAudioEnabled = true;
-    boolean isNotificationsEnabled = true;
+    boolean isNotificationsEnabled = false;
 
 
     @Override
@@ -227,16 +227,10 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     //Get/Set the selected settings
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void userSettings() {
-        if (wasHDSelected){
-            hbRecorder.recordHDVideo(true);
-        }else{
-            hbRecorder.recordHDVideo(false);
-        }
-        if (isAudioEnabled){
-            hbRecorder.isAudioEnabled(true);
-        }else{
-            hbRecorder.isAudioEnabled(true);
-        }
+        hbRecorder.recordHDVideo(isNotificationsEnabled);
+        hbRecorder.isAudioEnabled(isAudioEnabled);
+        showLongToast(""+isAudioEnabled);
+
         if (isNotificationsEnabled){
             hbRecorder.shouldShowNotification(true);
             hbRecorder.setNotificationSmallIcon(R.drawable.icon);
