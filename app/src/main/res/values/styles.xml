@@ -8,9 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="CheckboxStyle" parent="AppTheme">
-        <item name="colorAccent">@color/colorAccent</item>  // for checked
-        <item name="android:textColorSecondary">@color/white</item>  // for unchecked
+    <style name="CheckboxStyle" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/white</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
     </style>
 
 </resources>

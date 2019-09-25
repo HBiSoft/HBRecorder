@@ -4,15 +4,17 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Environment;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
-import androidx.appcompat.widget.AppCompatRadioButton;
 
 import android.util.Log;
 import android.view.View;
@@ -31,7 +33,7 @@ import java.io.File;
 /**
  * Created by HBiSoft on 13 Aug 2019
  * Copyright (c) 2019 . All rights reserved.
- * Last modified 13 Aug 2019
+ * Last modified 25 Sep 2019
  */
 
 /*
@@ -73,13 +75,16 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private Button startbtn;
 
     //HD/SD quality
-    private AppCompatRadioButton hdRadio;
-    private AppCompatRadioButton sdRadio;
     private RadioGroup radioGroup;
 
     //Should record/show audio/notification
     private CheckBox recordAudioCheckBox;
     private CheckBox notificationCheckbox;
+
+    //Reference to checkboxes and radio buttons
+    boolean wasHDSelected = true;
+    boolean isAudioEnabled = true;
+    boolean isNotificationsEnabled = true;
 
 
     @Override
@@ -90,22 +95,22 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         createFolder();
         initViews();
         mOnClickListeners();
-        radioButtonColorStates();
         radioGroupCheckListener();
         recordAudioCheckBoxListener();
         notificationCheckboxListener();
 
-        //Init HBRecorder
-        hbRecorder = new HBRecorder(this, this);
-        hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
-        hbRecorder.setAudioBitrate(128000);
-        hbRecorder.setAudioSamplingRate(44100);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //Init HBRecorder
+            hbRecorder = new HBRecorder(this, this);
+            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) + "/HBRecorder");
+            hbRecorder.setAudioBitrate(128000);
+            hbRecorder.setAudioSamplingRate(44100);
 
-
-        //When the user returns to the application, some UI changes might be necessary,
-        //check if recording is in progress and make changes accordingly
-        if (hbRecorder.isBusyRecording()) {
-            startbtn.setText(R.string.stop_recording);
+            //When the user returns to the application, some UI changes might be necessary,
+            //check if recording is in progress and make changes accordingly
+            if (hbRecorder.isBusyRecording()) {
+                startbtn.setText(R.string.stop_recording);
+            }
         }
 
     }
@@ -114,8 +119,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private void createFolder() {
         File f1 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), "HBRecorder");
         if (!f1.exists()) {
-            if (f1.mkdirs()){
-                Log.i("Folder ","created");
+            if (f1.mkdirs()) {
+                Log.i("Folder ", "created");
             }
         }
     }
@@ -124,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private void initViews() {
         startbtn = findViewById(R.id.button_start);
         radioGroup = findViewById(R.id.radio_group);
-        hdRadio = findViewById(R.id.hd_button);
-        sdRadio = findViewById(R.id.sd_button);
         recordAudioCheckBox = findViewById(R.id.audio_check_box);
         notificationCheckbox = findViewById(R.id.notification_check_box);
     }
@@ -135,43 +138,28 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         startbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //first check if permissions was granted
-                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
-                    hasPermissions = true;
-                }
-                if (hasPermissions) {
-                    //check if recording is in progress
-                    //and stop it if it is
-                    if (hbRecorder.isBusyRecording()) {
-                        hbRecorder.stopScreenRecording();
-                        startbtn.setText(R.string.start_recording);
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    //first check if permissions was granted
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                        hasPermissions = true;
                     }
-                    //else start recording
-                    else {
-                        startRecordingScreen();
+                    if (hasPermissions) {
+                        //check if recording is in progress
+                        //and stop it if it is
+                        if (hbRecorder.isBusyRecording()) {
+                            hbRecorder.stopScreenRecording();
+                            startbtn.setText(R.string.start_recording);
+                        }
+                        //else start recording
+                        else {
+                            startRecordingScreen();
+                        }
                     }
+                } else {
+                    showLongToast("This library requires API 21>");
                 }
             }
         });
-    }
-
-    //Change color states of radio buttons
-    private void radioButtonColorStates() {
-        ColorStateList colorStateList = new ColorStateList(
-                new int[][]{
-                        new int[]{-android.R.attr.state_checked},
-                        new int[]{android.R.attr.state_checked}
-                },
-                new int[]{
-                        ContextCompat.getColor(this, R.color.white)
-                        , ContextCompat.getColor(this, R.color.colorAccent),
-                }
-        );
-
-        hdRadio.setButtonTintList(colorStateList);
-        sdRadio.setButtonTintList(colorStateList);
-
     }
 
     //Check if HD/SD Video should be recorded
@@ -182,11 +170,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                 switch (checkedId) {
                     case R.id.hd_button:
                         //Ser HBRecorder to HD
-                        hbRecorder.recordHDVideo(true);
+                        wasHDSelected = true;
                         break;
                     case R.id.sd_button:
                         //Ser HBRecorder to SD
-                        hbRecorder.recordHDVideo(false);
+                        wasHDSelected = false;
                         break;
                 }
             }
@@ -198,13 +186,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         recordAudioCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if (isChecked) {
-                    //Enable audio
-                    hbRecorder.isAudioEnabled(true);
-                } else {
-                    //Disable audio
-                    hbRecorder.isAudioEnabled(false);
-                }
+                //Enable/Disable audio
+                isAudioEnabled = isChecked;
             }
         });
     }
@@ -214,17 +197,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         notificationCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                //Enable notifications
-                if (isChecked) {
-                    hbRecorder.shouldShowNotification(true);
-                    hbRecorder.setNotificationSmallIcon(R.drawable.icon);
-                    hbRecorder.setNotificationTitle("Recording your screen");
-                    hbRecorder.setNotificationDescription("Drag down to stop the recording");
-                }
-                //Disable notifications
-                else {
-                    hbRecorder.shouldShowNotification(false);
-                }
+                //Enable/Disable notifications
+                isNotificationsEnabled = isChecked;
             }
         });
     }
@@ -241,11 +215,36 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     //Start recording screen
     //It is important to call it like this
     //hbRecorder.startScreenRecording(data); should only be called in onActivityResult
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void startRecordingScreen() {
+        userSettings();
         MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
         startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
         startbtn.setText(R.string.stop_recording);
+    }
+
+    //Get/Set the selected settings
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void userSettings() {
+        if (wasHDSelected){
+            hbRecorder.recordHDVideo(true);
+        }else{
+            hbRecorder.recordHDVideo(false);
+        }
+        if (isAudioEnabled){
+            hbRecorder.isAudioEnabled(true);
+        }else{
+            hbRecorder.isAudioEnabled(true);
+        }
+        if (isNotificationsEnabled){
+            hbRecorder.shouldShowNotification(true);
+            hbRecorder.setNotificationSmallIcon(R.drawable.icon);
+            hbRecorder.setNotificationTitle("Recording your screen");
+            hbRecorder.setNotificationDescription("Drag down to stop the recording");
+        }else{
+            hbRecorder.shouldShowNotification(false);
+        }
     }
 
     //Check if permissions was granted
@@ -274,7 +273,9 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     hasPermissions = true;
                     //Permissions was provided
                     //Start screen recording
-                    startRecordingScreen();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        startRecordingScreen();
+                    }
                 } else {
                     hasPermissions = false;
                     showLongToast("No permission for " + Manifest.permission.WRITE_EXTERNAL_STORAGE);
@@ -288,13 +289,15 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                //It is important to call this before starting the recording
-                hbRecorder.onActivityResult(resultCode, data, this);
-                //Start screen recording
-                hbRecorder.startScreenRecording(data);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
+                if (resultCode == RESULT_OK) {
+                    //It is important to call this before starting the recording
+                    hbRecorder.onActivityResult(resultCode, data, this);
+                    //Start screen recording
+                    hbRecorder.startScreenRecording(data);
 
+                }
             }
         }
     }
