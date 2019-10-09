@@ -13,7 +13,7 @@ Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/down
 
 </br>
 
-<image src="https://media.giphy.com/media/Rhdoa8i9kVZXDFXYd9/giphy.gif" width="247" height="480" >
+<image src="https://user-images.githubusercontent.com/35602540/66485516-3e78fd80-eaa9-11e9-9fea-f59bfa7c1389.gif" width="247" height="480" >
 
 **Adding the library to your project:**
 ---
@@ -32,7 +32,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.3'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.4'
 }
 ```
     
@@ -45,12 +45,16 @@ dependencies {
 public class MainActivity extends AppCompatActivity implements HBRecorderListener {
 ```
 
-2. `Alt+Enter` to implement the following method:
+2. `Alt+Enter` to implement the following methods:
 
 ```java
 @Override
 public void HBRecorderOnComplete() {
     //This is called once the file was created
+}
+@Override
+public void HBRecorderOnError(int errorCode) {
+    //This is called when an error occurs
 }
 ```
     
@@ -96,10 +100,8 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
         if (resultCode == RESULT_OK) {
-            //It is important to call this before starting the recording
-            hbRecorder.onActivityResult(resultCode, data, this);
             //Start screen recording
-            hbRecorder.startScreenRecording(data);
+            hbRecorder.startScreenRecording(data, resultCode, this);
 
         }
     }
@@ -154,8 +156,30 @@ hbrecorder.setNotificationDescription(String);
 // Defaults to "STOP RECORDING"
 hbrecorder.setNotificationButtonText(String);
 ```
-    
 
-    
-    
-    
+Custom setting:
+---
+When you want to enable custom settings you must first call:
+```java
+hbRecorder.enableCustomSettings();
+```
+Then you can set the following:
+```java
+//MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.AudioSource.html
+hbRecorder.setAudioSource(String);
+//MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.VideoEncoder.html
+hbRecorder.setVideoEncoder(String);
+//It is best to use the device screen dimention, but you can change it by using
+hbRecorder.setScreenDimensions(HeightInPx, WidthInPx);
+//Frame rate is device dependent
+//You can use Camcoderprofile to determine the frame rate
+hbRecorder.setVideoFrameRate(int);
+//The bitrate is also dependent on the device and the frame rate that is set
+hbRecorder.setVideoBitrate(int);
+//MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.OutputFormat.html
+hbRecorder.setOutputFormat(String);
+```
+
+It is important to note that limitations are device dependent. It is best to set the video encoder to "DEFAULT" and let `MediaRecorder` pic the best encoder.
+
+In the demo app you will have the option to test different video encoders, bitrate, frame rate and output format. If your device does not support any of the parameters you have selected `HBRecorderOnError` will be called.
