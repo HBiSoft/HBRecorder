@@ -4,11 +4,30 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@color/main_background"
     tools:ignore="Overdraw">
 
+    <ImageView
+        android:layout_width="300dp"
+        android:layout_height="1dp"
+        android:layout_centerHorizontal="true"
+        android:background="#b1b1b1"
+        android:layout_marginTop="40dp"
+        android:id="@+id/hl"
+        android:alpha="0.5"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="QUICK SETTINGS"
+        android:layout_below="@+id/hl"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:id="@+id/title_qs"
+        android:textStyle="bold"/>
+
     <RadioGroup
-        android:layout_marginTop="50dp"
+        android:layout_below="@+id/title_qs"
+        android:layout_marginTop="20dp"
         android:id="@+id/radio_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,14 +40,14 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/high_definition"
-            android:textColor="@android:color/white" />
+            />
 
         <androidx.appcompat.widget.AppCompatRadioButton
             android:id="@+id/sd_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/standard_definition"
-            android:textColor="@android:color/white"/>
+            />
 
     </RadioGroup>
 
@@ -42,7 +61,6 @@
         android:layout_marginTop="30dp"
         android:checked="true"
         android:text="@string/record_audio"
-        android:textColor="@android:color/white"
         app:theme="@style/CheckboxStyle"
         />
 
@@ -55,9 +73,55 @@
         android:layout_marginTop="10dp"
         android:checked="false"
         android:text="@string/show_notification"
-        android:textColor="@android:color/white"
         app:theme="@style/CheckboxStyle"
         />
+
+    <ImageView
+        android:layout_width="300dp"
+        android:layout_height="1dp"
+        android:layout_below="@+id/notification_check_box"
+        android:layout_centerHorizontal="true"
+        android:background="#b1b1b1"
+        android:layout_marginTop="40dp"
+        android:id="@+id/hl1"
+        android:alpha="0.5"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="or"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:layout_below="@+id/hl1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:id="@+id/tvOr"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvOr"
+        android:layout_marginTop="40dp"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USE CUSTOM SETTINGS"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_centerVertical="true"
+            android:id="@+id/tvCustom"/>
+
+        <Switch
+            android:id="@+id/custom_settings_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@+id/tvCustom"
+            android:layout_marginStart="20dp"/>
+
+    </RelativeLayout>
+
 
     <RelativeLayout
         android:layout_width="match_parent"

@@ -8,11 +8,15 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 
 import androidx.annotation.RequiresApi;
 
+import android.os.Handler;
+import android.os.ResultReceiver;
 import android.util.DisplayMetrics;
+
 
 import java.io.ByteArrayOutputStream;
 
@@ -23,7 +27,6 @@ public class HBRecorder implements MyListener {
     private int mScreenDensity;
     private final Context context;
     private int resultCode;
-    private Intent data;
     private boolean isAudioEnabled = true;
     private boolean isVideoHDEnabled = true;
     private Activity activity;
@@ -38,19 +41,18 @@ public class HBRecorder implements MyListener {
     private final HBRecorderListener hbRecorderListener;
     private byte[] byteArray;
     private boolean shouldShowNotification = false;
+    private String audioSource = "MIC";
+    private String videoEncoder = "DEFAULT";
+    private boolean enableCustomSettings = false;
+    private int videoFrameRate = 30;
+    private int videoBitrate = 40000000;
+    private String outputFormat = "DEFAULT";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HBRecorder(Context context, HBRecorderListener listener) {
         this.context = context.getApplicationContext();
         this.hbRecorderListener = listener;
         getScreenDimensions();
-    }
-
-    /*Get resultCode, Intent and Activity from onActivityResult*/
-    public void onActivityResult(int resultCode, Intent data, Activity activity) {
-        this.resultCode = resultCode;
-        this.data = data;
-        this.activity = activity;
     }
 
     /*Set output path*/
@@ -79,9 +81,45 @@ public class HBRecorder implements MyListener {
         this.isAudioEnabled = bool;
     }
 
+    /*Set Audio Source*/
+    //MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.AudioSource.html
+    public void setAudioSource(String source){
+        audioSource = source;
+
+    }
+
     /*Enable/Disable HD recording*/
     public void recordHDVideo(boolean bool) {
         this.isVideoHDEnabled = bool;
+    }
+
+    /*Set Video Encoder*/
+    //MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.VideoEncoder.html
+    public void setVideoEncoder(String encoder){
+        videoEncoder = encoder;
+
+    }
+
+    //Enable Custom Settings
+    public void enableCustomSettings(){
+        enableCustomSettings = true;
+
+    }
+
+    //Set Video Frame Rate
+    public void setVideoFrameRate(int fps){
+        videoFrameRate = fps;
+    }
+
+    //Set Video BitRate
+    public void setVideoBitrate(int bitrate){
+        videoBitrate = bitrate;
+    }
+
+    //Set Output Format
+    //MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.OutputFormat.html
+    public void setOutputFormat(String format){
+        outputFormat = format;
     }
 
     /*Get/Set screen dimensions/resolution
@@ -92,6 +130,12 @@ public class HBRecorder implements MyListener {
         mScreenWidth = metrics.widthPixels;
         mScreenHeight = metrics.heightPixels;
         mScreenDensity = metrics.densityDpi;
+    }
+
+    //Set Custom Dimensions (NOTE - THIS IS NOT IDEAL - It is best to use the devices screen size)
+    public void setScreenDimensions(int heightInPX, int widthInPX){
+        mScreenHeight = heightInPX;
+        mScreenWidth = widthInPX;
     }
 
     /*Get file path including file name and extension*/
@@ -105,7 +149,9 @@ public class HBRecorder implements MyListener {
     }
 
     /*Start screen recording*/
-    public void startScreenRecording(Intent data) {
+    public void startScreenRecording(Intent data, int resultCode, Activity activity) {
+        this.resultCode = resultCode;
+        this.activity = activity;
         startService(data);
     }
 
@@ -176,6 +222,30 @@ public class HBRecorder implements MyListener {
         service.putExtra("notificationDescription", notificationDescription);
         service.putExtra("shouldShowNotification", shouldShowNotification);
         service.putExtra("notificationButtonText", notificationButtonText);
+        service.putExtra("enableCustomSettings", enableCustomSettings);
+        service.putExtra("audioSource",audioSource);
+        service.putExtra("videoEncoder", videoEncoder);
+
+        service.putExtra("videoFrameRate", videoFrameRate);
+        service.putExtra("videoBitrate", videoBitrate);
+        service.putExtra("outputFormat", outputFormat);
+        service.putExtra(ScreenRecordService.BUNDLED_LISTENER, new ResultReceiver(new Handler()) {
+            @Override
+            protected void onReceiveResult(int resultCode, Bundle resultData) {
+                super.onReceiveResult(resultCode, resultData);
+                if (resultCode == Activity.RESULT_OK) {
+                    String result = resultData.getString("error");
+                    if (result != null) {
+                        int errorCode = Integer.parseInt(result);
+                        observer.stopWatching();
+                        hbRecorderListener.HBRecorderOnError(errorCode);
+                        Intent mservice = new Intent(context, ScreenRecordService.class);
+                        context.stopService(mservice);
+                    }
+                }
+            }
+        });
+
 
         context.startService(service);
     }

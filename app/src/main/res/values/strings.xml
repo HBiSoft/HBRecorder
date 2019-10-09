@@ -6,4 +6,24 @@
     <string name="high_definition">High Definition</string>
     <string name="standard_definition">Standard Definition</string>
     <string name="show_notification">Show Notification</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="title_video_resolution">Resolution</string>
+    <string name="title_record_audio">Record Audio</string>
+    <string name="title_notification">Show Notification</string>
+
+    <string name="summary_video_resolution">Specify video size</string>
+    <string name="summary_record_audio">Should audio be recorded</string>
+    <string name="summary_notification">Should notification be shown</string>
+
+
+    <string name="key_record_audio">key_record_audio</string>
+    <string name="key_video_resolution">key_video_resolution</string>
+    <string name="key_video_fps">key_video_fps</string>
+    <string name="key_video_bitrate">key_video_bitrate</string>
+    <string name="key_show_notification">key_show_notification</string>
+    <string name="key_video_encoder">key_video_encoder</string>
+    <string name="key_audio_source">key_audio_source</string>
+    <string name="key_output_format">key_output_format</string>
 </resources>

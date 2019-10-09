@@ -3,7 +3,10 @@ package com.hbisoft.hbrecorderexample;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.MediaCodecInfo;
+import android.media.MediaCodecList;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Environment;
@@ -16,12 +19,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.hbisoft.hbrecorder.HBRecorder;
@@ -86,6 +93,9 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     boolean isAudioEnabled = true;
     boolean isNotificationsEnabled = false;
 
+    //Should custom settings be used
+    Switch custom_settings_switch;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         radioGroupCheckListener();
         recordAudioCheckBoxListener();
         notificationCheckboxListener();
+
+        MediaCodecInfo mediaCodecInfo = selectCodec("video/mp4");
+
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //Init HBRecorder
@@ -113,6 +126,25 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             }
         }
 
+    }
+
+    private static MediaCodecInfo selectCodec(String mimeType) {
+        int numCodecs = MediaCodecList.getCodecCount();
+        for (int i = 0; i < numCodecs; i++) {
+            MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
+
+            if (!codecInfo.isEncoder()) {
+                continue;
+            }
+
+            String[] types = codecInfo.getSupportedTypes();
+            for (int j = 0; j < types.length; j++) {
+                if (types[j].equalsIgnoreCase(mimeType)) {
+                    return codecInfo;
+                }
+            }
+        }
+        return null;
     }
 
     //Create Folder
@@ -131,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         radioGroup = findViewById(R.id.radio_group);
         recordAudioCheckBox = findViewById(R.id.audio_check_box);
         notificationCheckbox = findViewById(R.id.notification_check_box);
+        custom_settings_switch = findViewById(R.id.custom_settings_switch);
     }
 
     //Start Button OnClickListener
@@ -171,6 +204,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     case R.id.hd_button:
                         //Ser HBRecorder to HD
                         wasHDSelected = true;
+
                         break;
                     case R.id.sd_button:
                         //Ser HBRecorder to SD
@@ -212,24 +246,194 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
     }
 
+    @Override
+    public void HBRecorderOnError(int errorCode) {
+        // Error 38 happens when
+        // - the selected video encoder is not supported
+        // - the output format is not supported
+        // - if another app is using the microphone
+        if (errorCode == 38){
+            showLongToast("Some settings are not supported by your device");
+        }
+        startbtn.setText(R.string.start_recording);
+
+    }
+
     //Start recording screen
     //It is important to call it like this
     //hbRecorder.startScreenRecording(data); should only be called in onActivityResult
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void startRecordingScreen() {
-        userSettings();
-        MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
-        startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
-        startbtn.setText(R.string.stop_recording);
+        if (custom_settings_switch.isChecked()){
+            //WHEN SETTING CUSTOM SETTINGS YOU MUST SET THIS!!!
+            hbRecorder.enableCustomSettings();
+            customSettings();
+            MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
+            startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
+            startbtn.setText(R.string.stop_recording);
+        }else {
+            quickSettings();
+            MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
+            startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
+            startbtn.setText(R.string.stop_recording);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void customSettings() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        //Is audio enabled
+        boolean audio_enabled = prefs.getBoolean("key_record_audio", true);
+        hbRecorder.isAudioEnabled(audio_enabled);
+
+        //Audio Source
+        String audio_source = prefs.getString("key_audio_source", null);
+        if (audio_source!=null){
+            switch (audio_source) {
+                case "0":
+                    hbRecorder.setAudioSource("DEFAULT");
+                    break;
+                case "1":
+                    hbRecorder.setAudioSource("CAMCODER");
+                    break;
+                case "2":
+                    hbRecorder.setAudioSource("MIC");
+                    break;
+            }
+        }
+
+        //Video Encoder
+        String video_encoder = prefs.getString("key_video_encoder", null);
+        if (video_encoder!=null){
+            switch (video_encoder) {
+                case "0":
+                    hbRecorder.setVideoEncoder("DEFAULT");
+                    break;
+                case "1":
+                    hbRecorder.setVideoEncoder("H264");
+                    break;
+                case "2":
+                    hbRecorder.setVideoEncoder("H263");
+                    break;
+                case "3":
+                    hbRecorder.setVideoEncoder("HEVC");
+                    break;
+                case "4":
+                    hbRecorder.setVideoEncoder("MPEG_4_SP");
+                    break;
+                case "5":
+                    hbRecorder.setVideoEncoder("VP8");
+                    break;
+            }
+        }
+
+        //Video Dimensions
+        String video_resolution = prefs.getString("key_video_resolution",null);
+        if (video_resolution!=null){
+            switch (video_resolution) {
+                case "0":
+                    hbRecorder.setScreenDimensions(426, 240);
+                    break;
+                case "1":
+                    hbRecorder.setScreenDimensions(640, 360);
+                    break;
+                case "2":
+                    hbRecorder.setScreenDimensions(854, 480);
+                    break;
+                case "3":
+                    hbRecorder.setScreenDimensions(1280, 720);
+                    break;
+                case "4":
+                    hbRecorder.setScreenDimensions(1920, 1080);
+                    break;
+            }
+        }
+
+        //Video Frame Rate
+        String video_frame_rate = prefs.getString("key_video_fps", null);
+        if (video_frame_rate!=null){
+            switch (video_frame_rate) {
+                case "0":
+                    hbRecorder.setVideoFrameRate(60);
+                    break;
+                case "1":
+                    hbRecorder.setVideoFrameRate(50);
+                    break;
+                case "2":
+                    hbRecorder.setVideoFrameRate(48);
+                    break;
+                case "3":
+                    hbRecorder.setVideoFrameRate(30);
+                    break;
+                case "4":
+                    hbRecorder.setVideoFrameRate(25);
+                    break;
+                case "5":
+                    hbRecorder.setVideoFrameRate(24);
+                    break;
+            }
+        }
+
+        //Video Bitrate
+        String video_bit_rate = prefs.getString("key_video_bitrate",null);
+        if (video_bit_rate!=null){
+            switch (video_bit_rate) {
+                case "1":
+                    hbRecorder.setVideoBitrate(12000000);
+                    break;
+                case "2":
+                    hbRecorder.setVideoBitrate(8000000);
+                    break;
+                case "3":
+                    hbRecorder.setVideoBitrate(7500000);
+                    break;
+                case "4":
+                    hbRecorder.setVideoBitrate(5000000);
+                    break;
+                case "5":
+                    hbRecorder.setVideoBitrate(4000000);
+                    break;
+                case "6":
+                    hbRecorder.setVideoBitrate(2500000);
+                    break;
+                case "7":
+                    hbRecorder.setVideoBitrate(1500000);
+                    break;
+                case "8":
+                    hbRecorder.setVideoBitrate(1000000);
+                    break;
+            }
+        }
+        String output_format = prefs.getString("key_output_format",null);
+        if (output_format!=null){
+            switch (output_format) {
+                case "0":
+                    hbRecorder.setOutputFormat("DEFAULT");
+                    break;
+                case "1":
+                    hbRecorder.setOutputFormat("MPEG_4");
+                    break;
+                case "2":
+                    hbRecorder.setOutputFormat("THREE_GPP");
+                    break;
+                case "3":
+                    hbRecorder.setOutputFormat("WEBM");
+                    break;
+            }
+        }
+
+        boolean show_notificaton = prefs.getBoolean("key_show_notification", false);
+        hbRecorder.shouldShowNotification(show_notificaton);
     }
 
     //Get/Set the selected settings
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void userSettings() {
-        hbRecorder.recordHDVideo(isNotificationsEnabled);
+    private void quickSettings() {
+        hbRecorder.recordHDVideo(wasHDSelected);
         hbRecorder.isAudioEnabled(isAudioEnabled);
-        showLongToast(""+isAudioEnabled);
 
         if (isNotificationsEnabled){
             hbRecorder.shouldShowNotification(true);
@@ -239,6 +443,25 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         }else{
             hbRecorder.shouldShowNotification(false);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            // launch settings activity
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     //Check if permissions was granted
@@ -286,10 +509,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
                 if (resultCode == RESULT_OK) {
-                    //It is important to call this before starting the recording
-                    hbRecorder.onActivityResult(resultCode, data, this);
                     //Start screen recording
-                    hbRecorder.startScreenRecording(data);
+                    hbRecorder.startScreenRecording(data, resultCode, this);
 
                 }
             }

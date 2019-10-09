@@ -1,5 +1,6 @@
 package com.hbisoft.hbrecorder;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -17,11 +18,13 @@ import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 
 import androidx.annotation.RequiresApi;
 
+import android.os.ResultReceiver;
 import android.util.Log;
 
 import java.io.IOException;
@@ -51,6 +54,17 @@ public class ScreenRecordService extends Service {
     private int audioSamplingRate;
     private static String filePath;
     private static String fileName;
+    private String audioSource;
+    private int audioSourceAsInt;
+    private String videoEncoder;
+    private int videoEncoderAsInt;
+    private boolean isCustomSettingsEnabled;
+    private int videoFrameRate;
+    private int videoBitrate;
+    private String outputFormat;
+    private int outputFormatAsInt;
+
+    public final static String BUNDLED_LISTENER = "listener";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -72,10 +86,20 @@ public class ScreenRecordService extends Service {
         isAudioEnabled = intent.getBooleanExtra("audio", true);
         path = intent.getStringExtra("path");
         name = intent.getStringExtra("fileName");
+        audioSource = intent.getStringExtra("audioSource");
+        videoEncoder = intent.getStringExtra("videoEncoder");
+        videoFrameRate = intent.getIntExtra("videoFrameRate",30);
+        videoBitrate = intent.getIntExtra("videoBitrate",40000000);
+        setAudioSourceAsInt(audioSource);
+        setvideoEncoderAsInt(videoEncoder);
 
         filePath = name;
         audioBitrate = intent.getIntExtra("audioBitrate", 128000);
         audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
+        outputFormat = intent.getStringExtra("outputFormat");
+        setOutputformatAsInt(outputFormat);
+
+        isCustomSettingsEnabled = intent.getBooleanExtra("enableCustomSettings", false);
 
         if (notificationButtonText==null){
             notificationButtonText = "STOP RECORDING";
@@ -146,9 +170,123 @@ public class ScreenRecordService extends Service {
         mMediaProjection = createMediaProjection();
         mMediaRecorder = createMediaRecorder();
         mVirtualDisplay = createVirtualDisplay();
-        mMediaRecorder.start();
+
+
+        mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+            @Override
+            public void onError(MediaRecorder mediaRecorder, int i, int i1) {
+                //TODO - Implement onError listener
+                Log.e("ERROR", "WAS CALLED");
+            }
+        });
+
+        try {
+            mMediaRecorder.start();
+        }catch (IllegalStateException e){
+            // From the tests I've done, this can happen if another application is using the mic or if an unsupported video encoder was selected
+            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+            Bundle bundle = new Bundle();
+            bundle.putString("error", "38");
+            receiver.send(Activity.RESULT_OK, bundle);
+        }
+
 
         return Service.START_STICKY;
+    }
+
+    private void setOutputformatAsInt(String outputFormat) {
+        switch (outputFormat) {
+            case "DEFAULT":
+                outputFormatAsInt = 0;
+                break;
+            case "THREE_GPP":
+                outputFormatAsInt = 1;
+                break;
+            case "MPEG_4":
+                outputFormatAsInt = 2;
+                break;
+            case "AMR_NB":
+                outputFormatAsInt = 3;
+                break;
+            case "AMR_WB":
+                outputFormatAsInt = 4;
+                break;
+            case "AAC_ADTS":
+                outputFormatAsInt = 6;
+                break;
+            case "MPEG_2_TS":
+                outputFormatAsInt = 8;
+                break;
+            case "WEBM":
+                outputFormatAsInt = 9;
+                break;
+            case "OGG":
+                outputFormatAsInt = 11;
+                break;
+            default:
+                outputFormatAsInt = 2;
+        }
+    }
+
+    private void setvideoEncoderAsInt(String encoder) {
+        switch (encoder) {
+            case "DEFAULT":
+                videoEncoderAsInt = 0;
+                break;
+            case "H263":
+                videoEncoderAsInt = 1;
+                break;
+            case "H264":
+                videoEncoderAsInt = 2;
+                break;
+            case "MPEG_4_SP":
+                videoEncoderAsInt = 3;
+                break;
+            case "VP8":
+                videoEncoderAsInt = 4;
+                break;
+            case "HEVC":
+                videoEncoderAsInt = 5;
+                break;
+        }
+    }
+
+    private void setAudioSourceAsInt(String audioSource) {
+        switch (audioSource) {
+            case "DEFAULT":
+                audioSourceAsInt = 0;
+                break;
+            case "MIC":
+                audioSourceAsInt = 1;
+                break;
+            case "VOICE_UPLINK":
+                audioSourceAsInt = 2;
+                break;
+            case "VOICE_DOWNLINK":
+                audioSourceAsInt = 3;
+                break;
+            case "VOICE_CALL":
+                audioSourceAsInt = 4;
+                break;
+            case "CAMCODER":
+                audioSourceAsInt = 5;
+                break;
+            case "VOICE_RECOGNITION":
+                audioSourceAsInt = 6;
+                break;
+            case "VOICE_COMMUNICATION":
+                audioSourceAsInt = 7;
+                break;
+            case "REMOTE_SUBMIX":
+                audioSourceAsInt = 8;
+                break;
+            case "UNPROCESSED":
+                audioSourceAsInt = 9;
+                break;
+            case "VOICE_PERFORMANCE":
+                audioSourceAsInt = 10;
+                break;
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -187,28 +325,31 @@ public class ScreenRecordService extends Service {
 
 
         if (isAudioEnabled) {
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setAudioSource(audioSourceAsInt);
         }
         mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setOutputFormat(outputFormatAsInt);
         if (isAudioEnabled) {
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             mediaRecorder.setAudioEncodingBitRate(audioBitrate);
             mediaRecorder.setAudioSamplingRate(audioSamplingRate);
         }
 
+        mediaRecorder.setVideoEncoder(videoEncoderAsInt);
         mediaRecorder.setOutputFile(path + "/" + name + ".mp4");
         mediaRecorder.setVideoSize(mScreenWidth, mScreenHeight);
-        mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
-        if (isAudioEnabled) {
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-        }
-        if (!isVideoHD) {
-            mediaRecorder.setVideoEncodingBitRate(5000000);
-            mediaRecorder.setVideoFrameRate(30);
-            Log.e("info - ", String.valueOf(2 * mScreenWidth * mScreenHeight));
-        } else {
-            mediaRecorder.setVideoEncodingBitRate(5 * mScreenWidth * mScreenHeight);
-            mediaRecorder.setVideoFrameRate(60); //after setVideoSource(), setOutFormat()
+
+        if (!isCustomSettingsEnabled) {
+            if (!isVideoHD) {
+                mediaRecorder.setVideoEncodingBitRate(12000000);
+                mediaRecorder.setVideoFrameRate(30);
+            } else {
+                mediaRecorder.setVideoEncodingBitRate(5 * mScreenWidth * mScreenHeight);
+                mediaRecorder.setVideoFrameRate(60); //after setVideoSource(), setOutFormat()
+            }
+        }else{
+            mediaRecorder.setVideoEncodingBitRate(videoBitrate);
+            mediaRecorder.setVideoFrameRate(videoFrameRate);
         }
 
 
@@ -230,6 +371,12 @@ public class ScreenRecordService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        resetAll();
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void resetAll() {
         stopForeground(true);
         if (mVirtualDisplay != null) {
             mVirtualDisplay.release();
@@ -245,7 +392,6 @@ public class ScreenRecordService extends Service {
             mMediaProjection.stop();
             mMediaProjection = null;
         }
-
     }
 
     @Override

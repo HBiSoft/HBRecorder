@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_video_resolution">
+        <item>426x240</item>
+        <item>640x360</item>
+        <item>854x480</item>
+        <item>1280x720</item>
+        <item>1920x1080</item>
+        <item>Default</item>
+    </string-array>
+    <string-array name="pref_video_framerate">
+        <item>60 FPS</item>
+        <item>50 FPS</item>
+        <item>48 FPS</item>
+        <item>30 FPS</item>
+        <item>25 FPS</item>
+        <item>24 FPS</item>
+        <item>Default</item>
+    </string-array>
+    <string-array name="pref_video_bitrate">
+        <item>Auto</item>
+        <item>12 Mbps</item>
+        <item>8 Mbps</item>
+        <item>7.5 Mbps</item>
+        <item>5 Mbps</item>
+        <item>4 Mbps</item>
+        <item>2.5 Mbps</item>
+        <item>1.5 Mbps</item>
+        <item>1 Mbps</item>
+    </string-array>
+
+    <string-array name="pref_output_format">
+        <item>DEFAULT</item>
+        <item>MPEG_4</item>
+        <item>THREE_GPP</item>
+        <item>WEBM</item>
+    </string-array>
+
+    <string-array name="pref_video_encoder">
+        <item>DEFAULT</item>
+        <item>H264</item>
+        <item>H263</item>
+        <item>HEVC</item>
+        <item>MPEG_4_SP</item>
+        <item>VP8</item>
+    </string-array>
+
+    <string-array name="pref_audio_source">
+        <item>DEFAULT</item>
+        <item>CAMCODER</item>
+        <item>MIC</item>
+    </string-array>
+
+    <string-array name="pref_audio_source_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
+    <string-array name="pref_video_resolution_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+    </string-array>
+</resources>
