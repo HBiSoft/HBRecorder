@@ -234,11 +234,10 @@ public class HBRecorder implements MyListener {
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 super.onReceiveResult(resultCode, resultData);
                 if (resultCode == Activity.RESULT_OK) {
-                    String result = resultData.getString("error");
+                    String result = resultData.getString("errorReason");
                     if (result != null) {
-                        int errorCode = Integer.parseInt(result);
                         observer.stopWatching();
-                        hbRecorderListener.HBRecorderOnError(errorCode);
+                        hbRecorderListener.HBRecorderOnError(100, result);
                         Intent mservice = new Intent(context, ScreenRecordService.class);
                         context.stopService(mservice);
                     }

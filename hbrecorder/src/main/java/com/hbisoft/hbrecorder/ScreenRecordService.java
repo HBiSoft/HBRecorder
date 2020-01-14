@@ -27,7 +27,6 @@ import androidx.annotation.RequiresApi;
 import android.os.ResultReceiver;
 import android.util.Log;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -54,24 +53,19 @@ public class ScreenRecordService extends Service {
     private int audioSamplingRate;
     private static String filePath;
     private static String fileName;
-    private String audioSource;
     private int audioSourceAsInt;
-    private String videoEncoder;
     private int videoEncoderAsInt;
     private boolean isCustomSettingsEnabled;
     private int videoFrameRate;
     private int videoBitrate;
-    private String outputFormat;
     private int outputFormatAsInt;
 
     public final static String BUNDLED_LISTENER = "listener";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        /*
-         *   Notification Start
-         */
+    public int onStartCommand(final Intent intent, int flags, int startId) {
+        //Get intent extras
         byte[] notificationSmallIcon = intent.getByteArrayExtra("notificationSmallBitmap");
         String notificationTitle = intent.getStringExtra("notificationTitle");
         String notificationDescription = intent.getStringExtra("notificationDescription");
@@ -86,36 +80,39 @@ public class ScreenRecordService extends Service {
         isAudioEnabled = intent.getBooleanExtra("audio", true);
         path = intent.getStringExtra("path");
         name = intent.getStringExtra("fileName");
-        audioSource = intent.getStringExtra("audioSource");
-        videoEncoder = intent.getStringExtra("videoEncoder");
+        String audioSource = intent.getStringExtra("audioSource");
+        String videoEncoder = intent.getStringExtra("videoEncoder");
         videoFrameRate = intent.getIntExtra("videoFrameRate",30);
         videoBitrate = intent.getIntExtra("videoBitrate",40000000);
+
         setAudioSourceAsInt(audioSource);
         setvideoEncoderAsInt(videoEncoder);
 
         filePath = name;
         audioBitrate = intent.getIntExtra("audioBitrate", 128000);
         audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
-        outputFormat = intent.getStringExtra("outputFormat");
+        String outputFormat = intent.getStringExtra("outputFormat");
         setOutputformatAsInt(outputFormat);
 
         isCustomSettingsEnabled = intent.getBooleanExtra("enableCustomSettings", false);
 
+        //Set notification notification button text if developer did not
         if (notificationButtonText==null){
             notificationButtonText = "STOP RECORDING";
         }
-
+        //Set notification bitrate if developer did not
         if (audioBitrate == 0){
             audioBitrate = 128000;
         }
+        //Set notification sampling rate if developer did not
         if (audioSamplingRate == 0){
             audioSamplingRate = 44100;
         }
-
+        //Set notification title if developer did not
         if (notificationTitle == null || notificationTitle.equals("")){
             notificationTitle = "Recording your screen";
         }
-
+        //Set notification description if developer did not
         if (notificationDescription == null || notificationDescription.equals("")){
             notificationDescription = "Drag down to stop the recording";
         }
@@ -150,7 +147,6 @@ public class ScreenRecordService extends Service {
                     } else {
                         //Modify notification badge
                         notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(R.drawable.icon).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
-
                     }
                     startForeground(101, notification);
                 }
@@ -158,35 +154,62 @@ public class ScreenRecordService extends Service {
                 startForeground(101, new Notification());
             }
         }
-        /*
-         *   Notification End
-         */
+        //Notification End
 
 
         if (path == null) {
             path = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
         }
 
-        mMediaProjection = createMediaProjection();
-        mMediaRecorder = createMediaRecorder();
-        mVirtualDisplay = createVirtualDisplay();
+        //Init MediaRecorder
+        try {
+            initRecorder();
+        }catch (Exception e){
+            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+            Bundle bundle = new Bundle();
+            bundle.putString("errorReason", Log.getStackTraceString(e));
+            receiver.send(Activity.RESULT_OK, bundle);
+        }
 
+        //Init MediaProjection
+        try {
+            initMediaProjection();
+        }catch (Exception e){
+            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+            Bundle bundle = new Bundle();
+            bundle.putString("errorReason", Log.getStackTraceString(e));
+            receiver.send(Activity.RESULT_OK, bundle);
+        }
 
+        //Init VirtualDisplay
+        try {
+            initVirtualDisplay();
+        }catch (Exception e){
+            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+            Bundle bundle = new Bundle();
+            bundle.putString("errorReason", Log.getStackTraceString(e));
+            receiver.send(Activity.RESULT_OK, bundle);
+        }
         mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
             @Override
             public void onError(MediaRecorder mediaRecorder, int i, int i1) {
-                //TODO - Implement onError listener
-                Log.e("ERROR", "WAS CALLED");
+                ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                Bundle bundle = new Bundle();
+                bundle.putString("error", "38");
+                bundle.putString("errorReason", String.valueOf(i));
+                receiver.send(Activity.RESULT_OK, bundle);
             }
         });
 
+        //Start Recording
         try {
             mMediaRecorder.start();
-        }catch (IllegalStateException e){
+        }catch (Exception e){
             // From the tests I've done, this can happen if another application is using the mic or if an unsupported video encoder was selected
             ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
             Bundle bundle = new Bundle();
             bundle.putString("error", "38");
+            bundle.putString("errorReason", Log.getStackTraceString(e));
             receiver.send(Activity.RESULT_OK, bundle);
         }
 
@@ -194,6 +217,8 @@ public class ScreenRecordService extends Service {
         return Service.START_STICKY;
     }
 
+    //Set output format as int based on what developer has provided
+    //It is important to provide one of the following and nothing else.
     private void setOutputformatAsInt(String outputFormat) {
         switch (outputFormat) {
             case "DEFAULT":
@@ -228,6 +253,8 @@ public class ScreenRecordService extends Service {
         }
     }
 
+    //Set video encoder as int based on what developer has provided
+    //It is important to provide one of the following and nothing else.
     private void setvideoEncoderAsInt(String encoder) {
         switch (encoder) {
             case "DEFAULT":
@@ -251,6 +278,8 @@ public class ScreenRecordService extends Service {
         }
     }
 
+    //Set audio source as int based on what developer has provided
+    //It is important to provide one of the following and nothing else.
     private void setAudioSourceAsInt(String audioSource) {
         switch (audioSource) {
             case "DEFAULT":
@@ -290,22 +319,22 @@ public class ScreenRecordService extends Service {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private MediaProjection createMediaProjection() {
-        return ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).
-                getMediaProjection(mResultCode, mResultData);
+    private void initMediaProjection(){
+        mMediaProjection =  ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).getMediaProjection(mResultCode, mResultData);
     }
 
+    //Return the output file path as string
     public static String getFilePath() {
         return filePath;
     }
 
+    //Return the name of the output file
     public static String getFileName() {
         return fileName;
     }
 
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private MediaRecorder createMediaRecorder() {
+    private void initRecorder() throws Exception{
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
         Date curDate = new Date(System.currentTimeMillis());
         String curTime = formatter.format(curDate).replace(" ", "");
@@ -321,50 +350,46 @@ public class ScreenRecordService extends Service {
 
         fileName = name + ".mp4";
 
-        MediaRecorder mediaRecorder = new MediaRecorder();
+        mMediaRecorder = new MediaRecorder();
 
 
         if (isAudioEnabled) {
-            mediaRecorder.setAudioSource(audioSourceAsInt);
+            mMediaRecorder.setAudioSource(audioSourceAsInt);
         }
-        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
-        mediaRecorder.setOutputFormat(outputFormatAsInt);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        mMediaRecorder.setOutputFormat(outputFormatAsInt);
         if (isAudioEnabled) {
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            mediaRecorder.setAudioEncodingBitRate(audioBitrate);
-            mediaRecorder.setAudioSamplingRate(audioSamplingRate);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            mMediaRecorder.setAudioEncodingBitRate(audioBitrate);
+            mMediaRecorder.setAudioSamplingRate(audioSamplingRate);
         }
 
-        mediaRecorder.setVideoEncoder(videoEncoderAsInt);
-        mediaRecorder.setOutputFile(path + "/" + name + ".mp4");
-        mediaRecorder.setVideoSize(mScreenWidth, mScreenHeight);
+        mMediaRecorder.setVideoEncoder(videoEncoderAsInt);
+        mMediaRecorder.setOutputFile(path + "/" + name + ".mp4");
+        mMediaRecorder.setVideoSize(mScreenWidth, mScreenHeight);
 
         if (!isCustomSettingsEnabled) {
             if (!isVideoHD) {
-                mediaRecorder.setVideoEncodingBitRate(12000000);
-                mediaRecorder.setVideoFrameRate(30);
+                mMediaRecorder.setVideoEncodingBitRate(12000000);
+                mMediaRecorder.setVideoFrameRate(30);
             } else {
-                mediaRecorder.setVideoEncodingBitRate(5 * mScreenWidth * mScreenHeight);
-                mediaRecorder.setVideoFrameRate(60); //after setVideoSource(), setOutFormat()
+                mMediaRecorder.setVideoEncodingBitRate(5 * mScreenWidth * mScreenHeight);
+                mMediaRecorder.setVideoFrameRate(60); //after setVideoSource(), setOutFormat()
             }
         }else{
-            mediaRecorder.setVideoEncodingBitRate(videoBitrate);
-            mediaRecorder.setVideoFrameRate(videoFrameRate);
+            mMediaRecorder.setVideoEncodingBitRate(videoBitrate);
+            mMediaRecorder.setVideoFrameRate(videoFrameRate);
         }
 
 
-        try {
-            mediaRecorder.prepare();
-        } catch (IllegalStateException | IOException e) {
-            Log.e(TAG, "createMediaRecorder: e = " + e.toString());
-        }
+        mMediaRecorder.prepare();
 
-        return mediaRecorder;
+        //return mediaRecorder;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private VirtualDisplay createVirtualDisplay() {
-        return mMediaProjection.createVirtualDisplay(TAG, mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mMediaRecorder.getSurface(), null, null);
+    private void initVirtualDisplay(){
+        mVirtualDisplay = mMediaProjection.createVirtualDisplay(TAG, mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mMediaRecorder.getSurface(), null, null);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

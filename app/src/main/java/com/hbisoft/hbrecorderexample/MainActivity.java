@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.media.MediaCodecInfo;
-import android.media.MediaCodecList;
 import android.media.projection.MediaProjectionManager;
 import android.os.Build;
 import android.os.Environment;
@@ -109,9 +107,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         recordAudioCheckBoxListener();
         notificationCheckboxListener();
 
-        MediaCodecInfo mediaCodecInfo = selectCodec("video/mp4");
-
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //Init HBRecorder
             hbRecorder = new HBRecorder(this, this);
@@ -126,25 +121,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             }
         }
 
-    }
-
-    private static MediaCodecInfo selectCodec(String mimeType) {
-        int numCodecs = MediaCodecList.getCodecCount();
-        for (int i = 0; i < numCodecs; i++) {
-            MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i);
-
-            if (!codecInfo.isEncoder()) {
-                continue;
-            }
-
-            String[] types = codecInfo.getSupportedTypes();
-            for (int j = 0; j < types.length; j++) {
-                if (types[j].equalsIgnoreCase(mimeType)) {
-                    return codecInfo;
-                }
-            }
-        }
-        return null;
     }
 
     //Create Folder
@@ -247,14 +223,20 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     @Override
-    public void HBRecorderOnError(int errorCode) {
+    public void HBRecorderOnError(int errorCode, String reason) {
         // Error 38 happens when
         // - the selected video encoder is not supported
         // - the output format is not supported
         // - if another app is using the microphone
+
+        //It is best to use device default
+
         if (errorCode == 38){
             showLongToast("Some settings are not supported by your device");
+        }else{
+            Log.e("HBRecorderOnError", reason);
         }
+
         startbtn.setText(R.string.start_recording);
 
     }
