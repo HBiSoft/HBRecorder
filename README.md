@@ -12,7 +12,7 @@ Lightweight screen and audio capturing Android library
 Demo:
 ---
 
-Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.2/HBRecorderDemo.apk)
+Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.5/HBRecorderDemo.apk)
 
 </br>
 
@@ -35,7 +35,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.4'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.5'
 }
 ```
     
