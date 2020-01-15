@@ -88,9 +88,9 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
 That's it, `HBRecorder` is now ready to be used.
 
+---
 
-
-When ever you want to start capturing your screen, it is important you do it as shown below:
+When you want to start capturing your screen, it is important you do it as shown below:
 ---
 ```java
 private void startRecordingScreen() {
