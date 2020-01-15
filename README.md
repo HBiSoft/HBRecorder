@@ -84,9 +84,10 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 <!--This is only necessary if you are displaying notifications-->
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-```
-</br>    
-That's it `HBRecorder` is now ready to be used.
+```   
+
+That's it, `HBRecorder` is now ready to be used.
+
 
 
 When ever you want to start capturing your screen, it is important you do it as shown below:
