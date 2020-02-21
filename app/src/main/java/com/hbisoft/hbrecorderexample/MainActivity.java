@@ -30,6 +30,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.hbisoft.hbrecorder.HBRecorder;
+import com.hbisoft.hbrecorder.HBRecorderCodecInfo;
 import com.hbisoft.hbrecorder.HBRecorderListener;
 
 import java.io.File;
@@ -312,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             }
         }
 
+        //NOTE - THIS MIGHT NOT BE SUPPORTED SIZES FOR YOUR DEVICE
         //Video Dimensions
         String video_resolution = prefs.getString("key_video_resolution",null);
         if (video_resolution!=null){

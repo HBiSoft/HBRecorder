@@ -73,8 +73,16 @@ public class ScreenRecordService extends Service {
         String notificationButtonText = intent.getStringExtra("notificationButtonText");
         mResultCode = intent.getIntExtra("code", -1);
         mResultData = intent.getParcelableExtra("data");
-        mScreenWidth = intent.getIntExtra("width", 720);
-        mScreenHeight = intent.getIntExtra("height", 1280);
+        mScreenWidth = intent.getIntExtra("width", 0);
+        mScreenHeight = intent.getIntExtra("height", 0);
+
+        if (mScreenHeight == 0 || mScreenWidth == 0){
+            HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
+            hbRecorderCodecInfo.setContext(this);
+            mScreenHeight = hbRecorderCodecInfo.getMaxSupportedHeight();
+            mScreenWidth = hbRecorderCodecInfo.getMaxSupportedWidth();
+        }
+
         mScreenDensity = intent.getIntExtra("density", 1);
         isVideoHD = intent.getBooleanExtra("quality", true);
         isAudioEnabled = intent.getBooleanExtra("audio", true);

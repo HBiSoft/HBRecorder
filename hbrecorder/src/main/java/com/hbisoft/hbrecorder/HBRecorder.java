@@ -52,7 +52,7 @@ public class HBRecorder implements MyListener {
     public HBRecorder(Context context, HBRecorderListener listener) {
         this.context = context.getApplicationContext();
         this.hbRecorderListener = listener;
-        getScreenDimensions();
+        setScreenDensity();
     }
 
     /*Set output path*/
@@ -122,17 +122,13 @@ public class HBRecorder implements MyListener {
         outputFormat = format;
     }
 
-    /*Get/Set screen dimensions/resolution
-    * This is use to determine video bitrate
-    * */
-    private void getScreenDimensions() {
+    // Set screen densityDpi
+    private void setScreenDensity() {
         DisplayMetrics metrics = Resources.getSystem().getDisplayMetrics();
-        mScreenWidth = metrics.widthPixels;
-        mScreenHeight = metrics.heightPixels;
         mScreenDensity = metrics.densityDpi;
     }
 
-    //Set Custom Dimensions (NOTE - THIS IS NOT IDEAL - It is best to use the devices screen size)
+    //Set Custom Dimensions (NOTE - YOUR DEVICE MIGHT NOT SUPPORT THE SIZE YOU PASS IT)
     public void setScreenDimensions(int heightInPX, int widthInPX){
         mScreenHeight = heightInPX;
         mScreenWidth = widthInPX;
