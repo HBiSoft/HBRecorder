@@ -12,7 +12,7 @@ Lightweight screen and audio capturing Android library
 Demo:
 ---
 
-Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.5/HBRecorderDemo.apk)
+Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.6/HBRecorderDemo.apk)
 
 </br>
 
@@ -35,7 +35,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.5'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.6'
 }
 ```
     
@@ -173,7 +173,7 @@ Then you can set the following:
 hbRecorder.setAudioSource(String);
 //MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.VideoEncoder.html
 hbRecorder.setVideoEncoder(String);
-//It is best to use the device screen dimention, but you can change it by using
+//If nothing is provided, it will select the heighest value supported by your device
 hbRecorder.setScreenDimensions(HeightInPx, WidthInPx);
 //Frame rate is device dependent
 //You can use Camcoderprofile to determine the frame rate
