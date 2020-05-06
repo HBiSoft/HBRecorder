@@ -12,7 +12,7 @@ Lightweight screen and audio capturing Android library
 Demo:
 ---
 
-Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.6/HBRecorderDemo.apk)
+Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.7/HBRecorderDemo.apk)
 
 </br>
 
@@ -35,7 +35,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.6'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.7'
 }
 ```
     
@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
-<!--This is only necessary if you are displaying notifications-->
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 ```   
 
@@ -144,9 +143,6 @@ hbrecorder.startScreenRecording(Intent);
 hbrecorder.stopScreenRecording();
 // Check if recording is in progress
 hbrecorder.isBusyRecording();
-// Enable/Disable notification while recording by passing a boolean
-// Defaults to false
-hbrecorder.shouldShowNotification(boolean);
 // Set notification icon by passing, for example R.drawable.myicon
 // Defaults to R.drawable.icon
 hbrecorder.setNotificationSmallIcon(int);
@@ -184,6 +180,7 @@ hbRecorder.setVideoBitrate(int);
 hbRecorder.setOutputFormat(String);
 ```
 
+---
 It is important to note that limitations are device dependent. It is best to set the video encoder to "DEFAULT" and let `MediaRecorder` pic the best encoder.
 
 In the demo app you will have the option to test different video encoders, bitrate, frame rate and output format. If your device does not support any of the parameters you have selected `HBRecorderOnError` will be called.
