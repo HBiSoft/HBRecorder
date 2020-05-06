@@ -32,6 +32,11 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * Created by HBiSoft on 13 Aug 2019
+ * Copyright (c) 2019 . All rights reserved.
+ */
+
 public class ScreenRecordService extends Service {
 
     private static final String TAG = "ScreenRecordService";
@@ -69,14 +74,13 @@ public class ScreenRecordService extends Service {
         byte[] notificationSmallIcon = intent.getByteArrayExtra("notificationSmallBitmap");
         String notificationTitle = intent.getStringExtra("notificationTitle");
         String notificationDescription = intent.getStringExtra("notificationDescription");
-        boolean shouldShowNotification = intent.getBooleanExtra("shouldShowNotification", true);
         String notificationButtonText = intent.getStringExtra("notificationButtonText");
         mResultCode = intent.getIntExtra("code", -1);
         mResultData = intent.getParcelableExtra("data");
         mScreenWidth = intent.getIntExtra("width", 0);
         mScreenHeight = intent.getIntExtra("height", 0);
 
-        if (mScreenHeight == 0 || mScreenWidth == 0){
+        if (mScreenHeight == 0 || mScreenWidth == 0) {
             HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
             hbRecorderCodecInfo.setContext(this);
             mScreenHeight = hbRecorderCodecInfo.getMaxSupportedHeight();
@@ -90,79 +94,82 @@ public class ScreenRecordService extends Service {
         name = intent.getStringExtra("fileName");
         String audioSource = intent.getStringExtra("audioSource");
         String videoEncoder = intent.getStringExtra("videoEncoder");
-        videoFrameRate = intent.getIntExtra("videoFrameRate",30);
-        videoBitrate = intent.getIntExtra("videoBitrate",40000000);
+        videoFrameRate = intent.getIntExtra("videoFrameRate", 30);
+        videoBitrate = intent.getIntExtra("videoBitrate", 40000000);
 
-        setAudioSourceAsInt(audioSource);
-        setvideoEncoderAsInt(videoEncoder);
+        if (audioSource != null) {
+            setAudioSourceAsInt(audioSource);
+        }
+        if (videoEncoder != null) {
+            setvideoEncoderAsInt(videoEncoder);
+        }
 
         filePath = name;
         audioBitrate = intent.getIntExtra("audioBitrate", 128000);
         audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
         String outputFormat = intent.getStringExtra("outputFormat");
-        setOutputformatAsInt(outputFormat);
+        if (outputFormat != null) {
+            setOutputformatAsInt(outputFormat);
+        }
 
         isCustomSettingsEnabled = intent.getBooleanExtra("enableCustomSettings", false);
 
         //Set notification notification button text if developer did not
-        if (notificationButtonText==null){
+        if (notificationButtonText == null) {
             notificationButtonText = "STOP RECORDING";
         }
         //Set notification bitrate if developer did not
-        if (audioBitrate == 0){
+        if (audioBitrate == 0) {
             audioBitrate = 128000;
         }
         //Set notification sampling rate if developer did not
-        if (audioSamplingRate == 0){
+        if (audioSamplingRate == 0) {
             audioSamplingRate = 44100;
         }
         //Set notification title if developer did not
-        if (notificationTitle == null || notificationTitle.equals("")){
+        if (notificationTitle == null || notificationTitle.equals("")) {
             notificationTitle = "Recording your screen";
         }
         //Set notification description if developer did not
-        if (notificationDescription == null || notificationDescription.equals("")){
+        if (notificationDescription == null || notificationDescription.equals("")) {
             notificationDescription = "Drag down to stop the recording";
         }
 
-        //Check if notification should be shown
-        if (shouldShowNotification) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                String channelId = "001";
-                String channelName = "RecordChannel";
-                NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE);
-                channel.setLightColor(Color.BLUE);
-                channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                if (manager != null) {
-                    manager.createNotificationChannel(channel);
-                    Notification notification;
+        //Notification
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = "001";
+            String channelName = "RecordChannel";
+            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE);
+            channel.setLightColor(Color.BLUE);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+                Notification notification;
 
-                    Intent myIntent = new Intent(this, NotificationReceiver.class);
+                Intent myIntent = new Intent(this, NotificationReceiver.class);
 
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
 
-                    Notification.Action action = new Notification.Action.Builder(
-                            Icon.createWithResource(this, android.R.drawable.presence_video_online),
-                            notificationButtonText,
-                            pendingIntent).build();
+                Notification.Action action = new Notification.Action.Builder(
+                        Icon.createWithResource(this, android.R.drawable.presence_video_online),
+                        notificationButtonText,
+                        pendingIntent).build();
 
-                    if (notificationSmallIcon != null) {
-                        Bitmap bmp = BitmapFactory.decodeByteArray(notificationSmallIcon, 0, notificationSmallIcon.length);
-                        //Modify notification badge
-                        notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(Icon.createWithBitmap(bmp)).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
+                if (notificationSmallIcon != null) {
+                    Bitmap bmp = BitmapFactory.decodeByteArray(notificationSmallIcon, 0, notificationSmallIcon.length);
+                    //Modify notification badge
+                    notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(Icon.createWithBitmap(bmp)).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
 
-                    } else {
-                        //Modify notification badge
-                        notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(R.drawable.icon).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
-                    }
-                    startForeground(101, notification);
+                } else {
+                    //Modify notification badge
+                    notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(R.drawable.icon).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
                 }
-            } else {
-                startForeground(101, new Notification());
+                startForeground(101, notification);
             }
+        } else {
+            startForeground(101, new Notification());
         }
-        //Notification End
 
 
         if (path == null) {
@@ -172,31 +179,37 @@ public class ScreenRecordService extends Service {
         //Init MediaRecorder
         try {
             initRecorder();
-        }catch (Exception e){
+        } catch (Exception e) {
             ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
             Bundle bundle = new Bundle();
             bundle.putString("errorReason", Log.getStackTraceString(e));
-            receiver.send(Activity.RESULT_OK, bundle);
+            if (receiver != null) {
+                receiver.send(Activity.RESULT_OK, bundle);
+            }
         }
 
         //Init MediaProjection
         try {
             initMediaProjection();
-        }catch (Exception e){
+        } catch (Exception e) {
             ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
             Bundle bundle = new Bundle();
             bundle.putString("errorReason", Log.getStackTraceString(e));
-            receiver.send(Activity.RESULT_OK, bundle);
+            if (receiver != null) {
+                receiver.send(Activity.RESULT_OK, bundle);
+            }
         }
 
         //Init VirtualDisplay
         try {
             initVirtualDisplay();
-        }catch (Exception e){
+        } catch (Exception e) {
             ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
             Bundle bundle = new Bundle();
             bundle.putString("errorReason", Log.getStackTraceString(e));
-            receiver.send(Activity.RESULT_OK, bundle);
+            if (receiver != null) {
+                receiver.send(Activity.RESULT_OK, bundle);
+            }
         }
         mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
             @Override
@@ -205,20 +218,24 @@ public class ScreenRecordService extends Service {
                 Bundle bundle = new Bundle();
                 bundle.putString("error", "38");
                 bundle.putString("errorReason", String.valueOf(i));
-                receiver.send(Activity.RESULT_OK, bundle);
+                if (receiver != null) {
+                    receiver.send(Activity.RESULT_OK, bundle);
+                }
             }
         });
 
         //Start Recording
         try {
             mMediaRecorder.start();
-        }catch (Exception e){
+        } catch (Exception e) {
             // From the tests I've done, this can happen if another application is using the mic or if an unsupported video encoder was selected
             ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
             Bundle bundle = new Bundle();
             bundle.putString("error", "38");
             bundle.putString("errorReason", Log.getStackTraceString(e));
-            receiver.send(Activity.RESULT_OK, bundle);
+            if (receiver != null) {
+                receiver.send(Activity.RESULT_OK, bundle);
+            }
         }
 
 
@@ -327,8 +344,8 @@ public class ScreenRecordService extends Service {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void initMediaProjection(){
-        mMediaProjection =  ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).getMediaProjection(mResultCode, mResultData);
+    private void initMediaProjection() {
+        mMediaProjection = ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).getMediaProjection(mResultCode, mResultData);
     }
 
     //Return the output file path as string
@@ -342,7 +359,7 @@ public class ScreenRecordService extends Service {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void initRecorder() throws Exception{
+    private void initRecorder() throws Exception {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
         Date curDate = new Date(System.currentTimeMillis());
         String curTime = formatter.format(curDate).replace(" ", "");
@@ -384,7 +401,7 @@ public class ScreenRecordService extends Service {
                 mMediaRecorder.setVideoEncodingBitRate(5 * mScreenWidth * mScreenHeight);
                 mMediaRecorder.setVideoFrameRate(60); //after setVideoSource(), setOutFormat()
             }
-        }else{
+        } else {
             mMediaRecorder.setVideoEncodingBitRate(videoBitrate);
             mMediaRecorder.setVideoFrameRate(videoFrameRate);
         }
@@ -396,7 +413,7 @@ public class ScreenRecordService extends Service {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void initVirtualDisplay(){
+    private void initVirtualDisplay() {
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(TAG, mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mMediaRecorder.getSurface(), null, null);
     }
 

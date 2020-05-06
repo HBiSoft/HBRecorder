@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory android:title="Audio Configuration">
-        <SwitchPreference
+        <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="@string/key_record_audio"
             android:summary="@string/summary_record_audio"
             android:title="@string/title_record_audio" />
 
-        <ListPreference
+        <androidx.preference.ListPreference
             android:defaultValue="2"
             android:dialogTitle="Audio Source"
             android:entries="@array/pref_audio_source"
@@ -20,7 +20,7 @@
 
     <PreferenceCategory android:title="Video Configuration">
 
-        <ListPreference
+        <androidx.preference.ListPreference
             android:defaultValue="0"
             android:dialogTitle="Video Encoder"
             android:entries="@array/pref_video_encoder"
@@ -29,7 +29,7 @@
             android:summary="Select video encoder"
             android:title="Video encoder" />
 
-        <ListPreference
+        <androidx.preference.ListPreference
             android:defaultValue="4"
             android:dialogTitle="@string/title_video_resolution"
             android:entries="@array/pref_video_resolution"
@@ -38,7 +38,7 @@
             android:summary="@string/summary_video_resolution"
             android:title="@string/title_video_resolution" />
 
-        <ListPreference
+        <androidx.preference.ListPreference
             android:defaultValue="3"
             android:dialogTitle="Frame rate"
             android:entries="@array/pref_video_framerate"
@@ -47,7 +47,7 @@
             android:summary="Set video frame rate"
             android:title="Frame rate" />
 
-        <ListPreference
+        <androidx.preference.ListPreference
             android:defaultValue="5"
             android:dialogTitle="Bit-rate"
             android:entries="@array/pref_video_bitrate"
@@ -60,7 +60,7 @@
 
     <PreferenceCategory android:title="More">
 
-        <ListPreference
+        <androidx.preference.ListPreference
             android:defaultValue="1"
             android:dialogTitle="Output Format"
             android:entries="@array/pref_output_format"
@@ -68,12 +68,6 @@
             android:key="@string/key_output_format"
             android:summary="Set output format"
             android:title="Output Format" />
-
-        <SwitchPreference
-            android:defaultValue="false"
-            android:key="@string/key_show_notification"
-            android:summary="@string/summary_notification"
-            android:title="@string/title_notification" />
 
     </PreferenceCategory>
 

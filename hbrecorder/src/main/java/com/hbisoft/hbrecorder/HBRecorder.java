@@ -16,9 +16,16 @@ import androidx.annotation.RequiresApi;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+
+/**
+ * Created by HBiSoft on 13 Aug 2019
+ * Copyright (c) 2019 . All rights reserved.
+ */
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class HBRecorder implements MyListener {
@@ -40,7 +47,6 @@ public class HBRecorder implements MyListener {
     private FileObserver observer;
     private final HBRecorderListener hbRecorderListener;
     private byte[] byteArray;
-    private boolean shouldShowNotification = false;
     private String audioSource = "MIC";
     private String videoEncoder = "DEFAULT";
     private boolean enableCustomSettings = false;
@@ -158,12 +164,13 @@ public class HBRecorder implements MyListener {
     }
 
     /*Check if recording is in progress*/
-    @SuppressWarnings("deprecation") //For more on why this is added, see - https://stackoverflow.com/q/45519439/5550161
     public boolean isBusyRecording() {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (ScreenRecordService.class.getName().equals(service.service.getClassName())) {
-                return true;
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+                if (ScreenRecordService.class.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
             }
         }
         return false;
@@ -175,11 +182,6 @@ public class HBRecorder implements MyListener {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byteArray = stream.toByteArray();
-    }
-
-    /*Enable/Disable notifications*/
-    public void shouldShowNotification(boolean bool) {
-        shouldShowNotification = bool;
     }
 
     /*Set notification title*/
@@ -198,51 +200,67 @@ public class HBRecorder implements MyListener {
 
     /*Start recording service*/
     private void startService(Intent data) {
-        observer = new FileObserver(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)), activity, HBRecorder.this);
-        observer.startWatching();
+        try {
+            if (outputPath!=null){
+                File file = new File(outputPath);
+                String parent = file.getParent();
+                observer = new FileObserver(parent, activity, HBRecorder.this);
+            }else {
+                observer = new FileObserver(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)), activity, HBRecorder.this);
+            }
+            observer.startWatching();
 
-        Intent service = new Intent(context, ScreenRecordService.class);
-        service.putExtra("code", resultCode);
-        service.putExtra("data", data);
-        service.putExtra("audio", isAudioEnabled);
-        service.putExtra("width", mScreenWidth);
-        service.putExtra("height", mScreenHeight);
-        service.putExtra("density", mScreenDensity);
-        service.putExtra("quality", isVideoHDEnabled);
-        service.putExtra("path", outputPath);
-        service.putExtra("fileName", fileName);
-        service.putExtra("audioBitrate", audioBitrate);
-        service.putExtra("audioSamplingRate", audioSamplingRate);
-        service.putExtra("notificationSmallBitmap", byteArray);
-        service.putExtra("notificationTitle", notificationTitle);
-        service.putExtra("notificationDescription", notificationDescription);
-        service.putExtra("shouldShowNotification", shouldShowNotification);
-        service.putExtra("notificationButtonText", notificationButtonText);
-        service.putExtra("enableCustomSettings", enableCustomSettings);
-        service.putExtra("audioSource",audioSource);
-        service.putExtra("videoEncoder", videoEncoder);
+            Intent service = new Intent(context, ScreenRecordService.class);
+            service.putExtra("code", resultCode);
+            service.putExtra("data", data);
+            service.putExtra("audio", isAudioEnabled);
+            service.putExtra("width", mScreenWidth);
+            service.putExtra("height", mScreenHeight);
+            service.putExtra("density", mScreenDensity);
+            service.putExtra("quality", isVideoHDEnabled);
+            service.putExtra("path", outputPath);
+            service.putExtra("fileName", fileName);
+            service.putExtra("audioBitrate", audioBitrate);
+            service.putExtra("audioSamplingRate", audioSamplingRate);
+            service.putExtra("notificationSmallBitmap", byteArray);
+            service.putExtra("notificationTitle", notificationTitle);
+            service.putExtra("notificationDescription", notificationDescription);
+            service.putExtra("notificationButtonText", notificationButtonText);
+            service.putExtra("enableCustomSettings", enableCustomSettings);
+            service.putExtra("audioSource",audioSource);
+            service.putExtra("videoEncoder", videoEncoder);
 
-        service.putExtra("videoFrameRate", videoFrameRate);
-        service.putExtra("videoBitrate", videoBitrate);
-        service.putExtra("outputFormat", outputFormat);
-        service.putExtra(ScreenRecordService.BUNDLED_LISTENER, new ResultReceiver(new Handler()) {
-            @Override
-            protected void onReceiveResult(int resultCode, Bundle resultData) {
-                super.onReceiveResult(resultCode, resultData);
-                if (resultCode == Activity.RESULT_OK) {
-                    String result = resultData.getString("errorReason");
-                    if (result != null) {
-                        observer.stopWatching();
-                        hbRecorderListener.HBRecorderOnError(100, result);
-                        Intent mservice = new Intent(context, ScreenRecordService.class);
-                        context.stopService(mservice);
+            service.putExtra("videoFrameRate", videoFrameRate);
+            service.putExtra("videoBitrate", videoBitrate);
+            service.putExtra("outputFormat", outputFormat);
+            service.putExtra(ScreenRecordService.BUNDLED_LISTENER, new ResultReceiver(new Handler()) {
+                @Override
+                protected void onReceiveResult(int resultCode, Bundle resultData) {
+                    super.onReceiveResult(resultCode, resultData);
+                    if (resultCode == Activity.RESULT_OK) {
+                        String result = resultData.getString("errorReason");
+                        if (result != null) {
+                            Log.e("CALLED", "CALLED");
+                            observer.stopWatching();
+                            hbRecorderListener.HBRecorderOnError(100, result);
+                            try {
+                                Intent mservice = new Intent(context, ScreenRecordService.class);
+                                context.stopService(mservice);
+                            }catch (Exception e){
+
+                            }
+
+                        }
                     }
                 }
-            }
-        });
+            });
 
 
-        context.startService(service);
+            context.startService(service);
+        }catch (Exception e){
+            hbRecorderListener.HBRecorderOnError(0, Log.getStackTraceString(e));
+        }
+
     }
 
     /*Complete callback method*/

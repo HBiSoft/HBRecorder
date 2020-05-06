@@ -1,9 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.hbisoft.hbrecorder">
 
+    <application
+        android:requestLegacyExternalStorage="true"
+        tools:targetApi="q">
 
-    <application>
-        <service android:name="com.hbisoft.hbrecorder.ScreenRecordService"/>
+        <service android:name="com.hbisoft.hbrecorder.ScreenRecordService"
+            android:foregroundServiceType="mediaProjection"
+            tools:targetApi="q" />
 
         <receiver android:name="com.hbisoft.hbrecorder.NotificationReceiver"/>
 

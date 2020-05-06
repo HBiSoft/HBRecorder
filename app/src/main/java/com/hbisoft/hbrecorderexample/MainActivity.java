@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 
@@ -30,7 +32,6 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.hbisoft.hbrecorder.HBRecorder;
-import com.hbisoft.hbrecorder.HBRecorderCodecInfo;
 import com.hbisoft.hbrecorder.HBRecorderListener;
 
 import java.io.File;
@@ -39,7 +40,6 @@ import java.io.File;
 /**
  * Created by HBiSoft on 13 Aug 2019
  * Copyright (c) 2019 . All rights reserved.
- * Last modified 25 Sep 2019
  */
 
 /*
@@ -85,12 +85,10 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
     //Should record/show audio/notification
     private CheckBox recordAudioCheckBox;
-    private CheckBox notificationCheckbox;
 
     //Reference to checkboxes and radio buttons
     boolean wasHDSelected = true;
     boolean isAudioEnabled = true;
-    boolean isNotificationsEnabled = false;
 
     //Should custom settings be used
     Switch custom_settings_switch;
@@ -106,12 +104,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         mOnClickListeners();
         radioGroupCheckListener();
         recordAudioCheckBoxListener();
-        notificationCheckboxListener();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //Init HBRecorder
             hbRecorder = new HBRecorder(this, this);
-            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) + "/HBRecorder");
+            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
             hbRecorder.setAudioBitrate(128000);
             hbRecorder.setAudioSamplingRate(44100);
 
@@ -139,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         startbtn = findViewById(R.id.button_start);
         radioGroup = findViewById(R.id.radio_group);
         recordAudioCheckBox = findViewById(R.id.audio_check_box);
-        notificationCheckbox = findViewById(R.id.notification_check_box);
         custom_settings_switch = findViewById(R.id.custom_settings_switch);
     }
 
@@ -203,24 +199,28 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         });
     }
 
-    //Check if notifications should be shown
-    private void notificationCheckboxListener() {
-        notificationCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                //Enable/Disable notifications
-                isNotificationsEnabled = isChecked;
-            }
-        });
-    }
-
     //Listener for when the recording is saved successfully
     //This will be called after the file was created
     @Override
     public void HBRecorderOnComplete() {
         startbtn.setText(R.string.start_recording);
         showLongToast("Saved Successfully");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            refreshGallery();
+        }
 
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void refreshGallery() {
+        MediaScannerConnection.scanFile(this,
+                new String[]{hbRecorder.getFilePath()}, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.i("ExternalStorage", "Scanned " + path + ":");
+                        Log.i("ExternalStorage", "-> uri=" + uri);
+                    }
+                });
     }
 
     @Override
@@ -232,9 +232,10 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         //It is best to use device default
 
-        if (errorCode == 38){
+        if (errorCode == 38) {
             showLongToast("Some settings are not supported by your device");
-        }else{
+        } else {
+            showLongToast("HBRecorderOnError - See Log");
             Log.e("HBRecorderOnError", reason);
         }
 
@@ -247,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     //hbRecorder.startScreenRecording(data); should only be called in onActivityResult
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void startRecordingScreen() {
-        if (custom_settings_switch.isChecked()){
+        if (custom_settings_switch.isChecked()) {
             //WHEN SETTING CUSTOM SETTINGS YOU MUST SET THIS!!!
             hbRecorder.enableCustomSettings();
             customSettings();
@@ -255,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
             startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
             startbtn.setText(R.string.stop_recording);
-        }else {
+        } else {
             quickSettings();
             MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
@@ -274,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         //Audio Source
         String audio_source = prefs.getString("key_audio_source", null);
-        if (audio_source!=null){
+        if (audio_source != null) {
             switch (audio_source) {
                 case "0":
                     hbRecorder.setAudioSource("DEFAULT");
@@ -290,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         //Video Encoder
         String video_encoder = prefs.getString("key_video_encoder", null);
-        if (video_encoder!=null){
+        if (video_encoder != null) {
             switch (video_encoder) {
                 case "0":
                     hbRecorder.setVideoEncoder("DEFAULT");
@@ -315,8 +316,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         //NOTE - THIS MIGHT NOT BE SUPPORTED SIZES FOR YOUR DEVICE
         //Video Dimensions
-        String video_resolution = prefs.getString("key_video_resolution",null);
-        if (video_resolution!=null){
+        String video_resolution = prefs.getString("key_video_resolution", null);
+        if (video_resolution != null) {
             switch (video_resolution) {
                 case "0":
                     hbRecorder.setScreenDimensions(426, 240);
@@ -338,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         //Video Frame Rate
         String video_frame_rate = prefs.getString("key_video_fps", null);
-        if (video_frame_rate!=null){
+        if (video_frame_rate != null) {
             switch (video_frame_rate) {
                 case "0":
                     hbRecorder.setVideoFrameRate(60);
@@ -362,8 +363,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         }
 
         //Video Bitrate
-        String video_bit_rate = prefs.getString("key_video_bitrate",null);
-        if (video_bit_rate!=null){
+        String video_bit_rate = prefs.getString("key_video_bitrate", null);
+        if (video_bit_rate != null) {
             switch (video_bit_rate) {
                 case "1":
                     hbRecorder.setVideoBitrate(12000000);
@@ -391,8 +392,10 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     break;
             }
         }
-        String output_format = prefs.getString("key_output_format",null);
-        if (output_format!=null){
+
+        //Output Format
+        String output_format = prefs.getString("key_output_format", null);
+        if (output_format != null) {
             switch (output_format) {
                 case "0":
                     hbRecorder.setOutputFormat("DEFAULT");
@@ -409,8 +412,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             }
         }
 
-        boolean show_notificaton = prefs.getBoolean("key_show_notification", false);
-        hbRecorder.shouldShowNotification(show_notificaton);
     }
 
     //Get/Set the selected settings
@@ -418,15 +419,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private void quickSettings() {
         hbRecorder.recordHDVideo(wasHDSelected);
         hbRecorder.isAudioEnabled(isAudioEnabled);
+        //Customise Notification
+        hbRecorder.setNotificationSmallIcon(R.drawable.icon);
+        hbRecorder.setNotificationTitle("Recording your screen");
+        hbRecorder.setNotificationDescription("Drag down to stop the recording");
 
-        if (isNotificationsEnabled){
-            hbRecorder.shouldShowNotification(true);
-            hbRecorder.setNotificationSmallIcon(R.drawable.icon);
-            hbRecorder.setNotificationTitle("Recording your screen");
-            hbRecorder.setNotificationDescription("Drag down to stop the recording");
-        }else{
-            hbRecorder.shouldShowNotification(false);
-        }
     }
 
     @Override

@@ -9,6 +9,11 @@ import android.view.WindowManager;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
+/**
+ * Created by HBiSoft on 13 Aug 2019
+ * Copyright (c) 2019 . All rights reserved.
+ */
+
 public class HBRecorderCodecInfo {
 
     int getMaxSupportedWidth(){
