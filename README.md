@@ -39,7 +39,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.7'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.8'
 }
 ```
     
@@ -158,6 +158,8 @@ hbrecorder.setNotificationDescription(String);
 //Set notification stop button text
 // Defaults to "STOP RECORDING"
 hbrecorder.setNotificationButtonText(String);
+// Set output orientation (in degrees)
+hbrecorder.setOrientationHint(int);
 ```
 
 Custom setting:
