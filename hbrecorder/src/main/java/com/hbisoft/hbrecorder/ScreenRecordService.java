@@ -64,6 +64,7 @@ public class ScreenRecordService extends Service {
     private int videoFrameRate;
     private int videoBitrate;
     private int outputFormatAsInt;
+    private int orientationHint;
 
     public final static String BUNDLED_LISTENER = "listener";
 
@@ -75,6 +76,7 @@ public class ScreenRecordService extends Service {
         String notificationTitle = intent.getStringExtra("notificationTitle");
         String notificationDescription = intent.getStringExtra("notificationDescription");
         String notificationButtonText = intent.getStringExtra("notificationButtonText");
+        orientationHint = intent.getIntExtra("orientation", 400);
         mResultCode = intent.getIntExtra("code", -1);
         mResultData = intent.getParcelableExtra("data");
         mScreenWidth = intent.getIntExtra("width", 0);
@@ -383,6 +385,11 @@ public class ScreenRecordService extends Service {
         }
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(outputFormatAsInt);
+
+        if (orientationHint != 400){
+            mMediaRecorder.setOrientationHint(orientationHint);
+        }
+
         if (isAudioEnabled) {
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             mMediaRecorder.setAudioEncodingBitRate(audioBitrate);

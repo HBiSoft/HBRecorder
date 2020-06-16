@@ -53,12 +53,17 @@ public class HBRecorder implements MyListener {
     private int videoFrameRate = 30;
     private int videoBitrate = 40000000;
     private String outputFormat = "DEFAULT";
+    private int orientation;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HBRecorder(Context context, HBRecorderListener listener) {
         this.context = context.getApplicationContext();
         this.hbRecorderListener = listener;
         setScreenDensity();
+    }
+
+    public void setOrientationHint(int orientationInDegrees){
+        orientation = orientationInDegrees;
     }
 
     /*Set output path*/
@@ -220,6 +225,7 @@ public class HBRecorder implements MyListener {
             service.putExtra("quality", isVideoHDEnabled);
             service.putExtra("path", outputPath);
             service.putExtra("fileName", fileName);
+            service.putExtra("orientation", orientation);
             service.putExtra("audioBitrate", audioBitrate);
             service.putExtra("audioSamplingRate", audioSamplingRate);
             service.putExtra("notificationSmallBitmap", byteArray);
