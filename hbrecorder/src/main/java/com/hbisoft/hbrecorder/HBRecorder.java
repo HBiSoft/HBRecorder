@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
 
 import android.os.Handler;
@@ -182,11 +183,16 @@ public class HBRecorder implements MyListener {
     }
 
     /*Change notification icon*/
-    public void setNotificationSmallIcon(int drawable) {
+    public void setNotificationSmallIcon(@DrawableRes int drawable) {
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), drawable);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byteArray = stream.toByteArray();
+    }
+
+    /*Change notification icon*/
+    public void setNotificationSmallIcon(byte[] bytes)  {
+        byteArray = bytes;
     }
 
     /*Set notification title*/
