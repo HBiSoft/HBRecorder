@@ -39,7 +39,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.8'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.9'
 }
 ```
     
