@@ -5,20 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -31,9 +25,17 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.hbisoft.hbrecorder.HBRecorder;
 import com.hbisoft.hbrecorder.HBRecorderListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 
@@ -420,7 +422,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         hbRecorder.recordHDVideo(wasHDSelected);
         hbRecorder.isAudioEnabled(isAudioEnabled);
         //Customise Notification
-        hbRecorder.setNotificationSmallIcon(R.drawable.icon);
+        hbRecorder.setNotificationSmallIcon(drawable2ByteArray(R.drawable.icon));
         hbRecorder.setNotificationTitle("Recording your screen");
         hbRecorder.setNotificationDescription("Drag down to stop the recording");
 
@@ -501,5 +503,13 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     //Show Toast
     private void showLongToast(final String msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+    }
+
+    //drawable to byte[]
+    private byte[] drawable2ByteArray(@DrawableRes int drawableId) {
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), drawableId);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
     }
 }
