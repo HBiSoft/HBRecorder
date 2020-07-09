@@ -149,7 +149,9 @@ hbrecorder.isBusyRecording();
 // Set notification icon by passing, for example R.drawable.myicon
 // Defaults to R.drawable.icon
 hbrecorder.setNotificationSmallIcon(int);
-// Set notification title 
+// Set notification icon by byte array
+hbrecorder.setNotificationSmallIcon(byte[]);
+// Set notification title
 // Defaults to "Recording your screen"
 hbrecorder.setNotificationTitle(String);
 // Set notification description
