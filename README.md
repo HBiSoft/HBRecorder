@@ -11,6 +11,17 @@ Lightweight screen and audio recording Android library </br></br><b>Requires API
 
 <p align="center"><a href="https://www.buymeacoffee.com/HBiSoft" target="_blank" ><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 164px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a></p>
 
+---
+**Take part in the poll. Let other developers know what version you have tested:**</br></br>
+[![11](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011/vote)</br>
+[![10](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010/vote)</br>
+[![9](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209/vote)</br>
+[![8](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%208)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%208/vote)</br>
+[![7](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%207)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%207/vote)</br>
+[![6](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%206)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%206/vote)</br>
+[![5](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%205)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%205/vote)</br>
+
+
 
 Demo:
 ---
