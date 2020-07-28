@@ -12,16 +12,6 @@ Lightweight screen and audio recording Android library </br></br><b>Requires API
 <p align="center"><a href="https://www.buymeacoffee.com/HBiSoft" target="_blank" ><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 164px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a></p>
 
 
----
-Take part in the poll. Let other developers know what version you have tested:</br>
-![11](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%2011)</br>
-![10](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%2010)</br>
-![09](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%209)</br>
-![08](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%208)</br>
-![07](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%207)</br>
-![06](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%206)</br>
-![05](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%205)
-
 Demo:
 ---
 
