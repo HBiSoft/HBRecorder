@@ -2,7 +2,7 @@
 [![](https://jitpack.io/v/HBiSoft/HBRecorder.svg)](https://jitpack.io/#HBiSoft/HBRecorder)
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-HBRecorder-green.svg?style=flat )]( https://android-arsenal.com/details/1/7897 )
 
-<p align="center">Lightweight screen and audio recording Android library </br></br><b>Requires API level 21></p>
+<p align="center">Lightweight screen and audio recording Android library </br></br><b>Requires API level 21></b></p>
 
 <p align="center"><img src="https://user-images.githubusercontent.com/35602540/63006287-7df6e500-be7e-11e9-82b6-40814d8201df.png"></p>
 
