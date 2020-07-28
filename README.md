@@ -2,35 +2,39 @@
 [![](https://jitpack.io/v/HBiSoft/HBRecorder.svg)](https://jitpack.io/#HBiSoft/HBRecorder)
 [![Android Arsenal]( https://img.shields.io/badge/Android%20Arsenal-HBRecorder-green.svg?style=flat )]( https://android-arsenal.com/details/1/7897 )
 
-Lightweight screen and audio recording Android library </br></br><b>Requires API level 21></b>
+<p align="center">Lightweight screen and audio recording Android library </br></br><b>Requires API level 21></p>
 
-![hbicon](https://user-images.githubusercontent.com/35602540/63006287-7df6e500-be7e-11e9-82b6-40814d8201df.png)
+<p align="center"><img src="https://user-images.githubusercontent.com/35602540/63006287-7df6e500-be7e-11e9-82b6-40814d8201df.png"></p>
+
+</br>
 
 
 **<p align="center">If you are using this library in one of your applications and would like to thank me:</p>**
 
 <p align="center"><a href="https://www.buymeacoffee.com/HBiSoft" target="_blank" ><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 164px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a></p>
 
----
-**Take part in the poll. Let other developers know what version you have tested:**</br></br>
-[![11](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011/vote)</br>
-[![10](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010/vote)</br>
-[![9](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209/vote)</br>
-[![8](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%208)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%208/vote)</br>
-[![7](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%207)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%207/vote)</br>
-[![6](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%206)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%206/vote)</br>
-[![5](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%205)](https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%205/vote)</br>
+<h2 align="center"><b>Demo:</b></h2>
+
+<p align="center">Download the demo app  <a href="https://github.com/HBiSoft/HBRecorder/releases/download/0.1.7/HBRecorderDemo.apk"><nobr>here</nobr></a></p>
+
+<p align="center"><img src="https://user-images.githubusercontent.com/35602540/66485516-3e78fd80-eaa9-11e9-9fea-f59bfa7c1389.gif" width="247" height="480" </p>
+
+</br></br>
 
 
+<h2 align="center"><b>Take part in the poll</b></h2>
 
-Demo:
----
+<p align="center">Let other developers know what version you have tested:</p></br></br>
 
-Download the demo app [here](https://github.com/HBiSoft/HBRecorder/releases/download/0.1.7/HBRecorderDemo.apk)
+<p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011" alt=""></a></p>
+<p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010" alt=""></a></p>
+<p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209" alt=""></a></p>
+<p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%208/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%208" alt=""></a></p>
+<p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%207/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%207" alt=""></a></p>
+<p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%206/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%206" alt=""></a></p>
+<p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%205/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%205" alt=""></a></p>
 
 </br>
-
-<image src="https://user-images.githubusercontent.com/35602540/66485516-3e78fd80-eaa9-11e9-9fea-f59bfa7c1389.gif" width="247" height="480" >
     
 
 **Adding the library to your project:**
