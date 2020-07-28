@@ -22,7 +22,7 @@
 </br></br>
 
 
-<h2 align="center"><b>Take part in the poll</b></h2>
+<h2 align="center">Take part in the poll</h2>
 
 <p align="center">Let other developers know what version you have tested:</p></br></br>
 
