@@ -13,14 +13,14 @@ Lightweight screen and audio recording Android library </br></br><b>Requires API
 
 
 ---
-**<p align="center">Take part in the poll. Let other developers know what version you have tested:</p>**
-<p align="center"><img src="https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%2011"/></p>
-<p align="center"><img src="https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%2010"/></p>
-<p align="center"><img src="https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%209"/></p>
-<p align="center"><img src="https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%208"/></p>
-<p align="center"><img src="https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%207"/></p>
-<p align="center"><img src="https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%206"/></p>
-<p align="center"><img src="https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%205"/></p>
+Take part in the poll. Let other developers know what version you have tested:</br>
+![11](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%2011)</br>
+![10](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%2010)</br>
+![09](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%209)</br>
+![08](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%208)</br>
+![07](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%207)</br>
+![06](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%206)</br>
+![05](https://api.gh-polls.com/poll/01EEA22VW39CACMP7FAR127QK9/Android%205)
 
 Demo:
 ---
