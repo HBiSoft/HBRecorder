@@ -54,7 +54,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.9'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.10'
 }
 ```
     
@@ -134,8 +134,13 @@ All available methods:
 ---
 ```java
 // Set the output path as a String
+// Only use this on devices running Android 9 and lower or you have to add android:requestLegacyExternalStorage="true" in your manifest
 // Defaults to - Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)
 hbrecorder.setOutputPath(String);
+// Set output Uri
+// Only use this on devices running Android 10>
+// When setting a Uri ensure you pass the same name to HBRecorder as what you set in ContentValues (DISPLAY_NAME and TITLE)
+hbRecorder.setOutputUri(Uri);
 // Set file name as String
 // Defaults to - quality + time stamp. For example HD-2019-08-14-10-09-58.mp4
 hbrecorder.setFileName(String);
