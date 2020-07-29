@@ -1,6 +1,8 @@
 package com.hbisoft.hbrecorderexample;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +40,9 @@ import com.hbisoft.hbrecorder.HBRecorderListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 
 /**
@@ -69,6 +75,7 @@ import java.io.File;
 *
 * */
 
+@SuppressWarnings({"deprecation", "SameParameterValue"})
 public class MainActivity extends AppCompatActivity implements HBRecorderListener {
     //Permissions
     private static final int SCREEN_RECORD_REQUEST_CODE = 777;
@@ -101,18 +108,14 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        createFolder();
         initViews();
-        mOnClickListeners();
-        radioGroupCheckListener();
-        recordAudioCheckBoxListener();
+        setOnClickListeners();
+        setRadioGroupCheckListener();
+        setRecordAudioCheckBoxListener();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //Init HBRecorder
             hbRecorder = new HBRecorder(this, this);
-            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
-            hbRecorder.setAudioBitrate(128000);
-            hbRecorder.setAudioSamplingRate(44100);
 
             //When the user returns to the application, some UI changes might be necessary,
             //check if recording is in progress and make changes accordingly
@@ -124,6 +127,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     //Create Folder
+    //Only call this on Android 9 and lower (getExternalStoragePublicDirectory is deprecated)
+    //This can still be used on Android 10> but you will have to add android:requestLegacyExternalStorage="true" in your Manifest
     private void createFolder() {
         File f1 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), "HBRecorder");
         if (!f1.exists()) {
@@ -142,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     //Start Button OnClickListener
-    private void mOnClickListeners() {
+    private void setOnClickListeners() {
         startbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -171,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     //Check if HD/SD Video should be recorded
-    private void radioGroupCheckListener() {
+    private void setRadioGroupCheckListener() {
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
@@ -191,7 +196,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     //Check if audio should be recorded
-    private void recordAudioCheckBoxListener() {
+    private void setRecordAudioCheckBoxListener() {
         recordAudioCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
@@ -208,13 +213,18 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         startbtn.setText(R.string.start_recording);
         showLongToast("Saved Successfully");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            refreshGallery();
+            //Update gallery depending on SDK Level
+            if (hbRecorder.wasUriSet()) {
+                updateGalleryUri();
+            }else{
+                refreshGalleryFile();
+            }
         }
 
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void refreshGallery() {
+    private void refreshGalleryFile() {
         MediaScannerConnection.scanFile(this,
                 new String[]{hbRecorder.getFilePath()}, null,
                 new MediaScannerConnection.OnScanCompletedListener() {
@@ -223,6 +233,12 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                         Log.i("ExternalStorage", "-> uri=" + uri);
                     }
                 });
+    }
+
+    private void updateGalleryUri(){
+        contentValues.clear();
+        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
+        getContentResolver().update(mUri, contentValues, null, null);
     }
 
     @Override
@@ -419,6 +435,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     //Get/Set the selected settings
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void quickSettings() {
+        hbRecorder.setAudioBitrate(128000);
+        hbRecorder.setAudioSamplingRate(44100);
         hbRecorder.recordHDVideo(wasHDSelected);
         hbRecorder.isAudioEnabled(isAudioEnabled);
         //Customise Notification
@@ -492,12 +510,48 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
                 if (resultCode == RESULT_OK) {
+                    //Set file path or Uri depending on SDK version
+                    setOutputPath();
                     //Start screen recording
                     hbRecorder.startScreenRecording(data, resultCode, this);
 
                 }
             }
         }
+    }
+
+    //For Android 10> we will pass a Uri to HBRecorder
+    //This is not necessary - You can still use getExternalStoragePublicDirectory
+    //But then you will have to add android:requestLegacyExternalStorage="true" in your Manifest
+    //IT IS IMPORTANT TO SET THE FILE NAME THE SAME AS THE NAME YOU USE FOR TITLE AND DISPLAY_NAME
+    ContentResolver resolver;
+    ContentValues contentValues;
+    Uri mUri;
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void setOutputPath() {
+        String filename = generateFileName();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            resolver = getContentResolver();
+            contentValues = new ContentValues();
+            contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "HBRecorder");
+            contentValues.put(MediaStore.Video.Media.TITLE, filename);
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
+            mUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
+            //FILE NAME SHOULD BE THE SAME
+            hbRecorder.setFileName(filename);
+            hbRecorder.setOutputUri(mUri);
+        }else{
+            createFolder();
+            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
+        }
+    }
+
+    //Generate a timestamp to be used as a file name
+    private String generateFileName() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
+        Date curDate = new Date(System.currentTimeMillis());
+        return formatter.format(curDate).replace(" ", "");
     }
 
     //Show Toast

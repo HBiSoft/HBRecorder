@@ -3,7 +3,6 @@
     package="com.hbisoft.hbrecorder">
 
     <application
-        android:requestLegacyExternalStorage="true"
         tools:targetApi="q">
 
         <service android:name="com.hbisoft.hbrecorder.ScreenRecordService"

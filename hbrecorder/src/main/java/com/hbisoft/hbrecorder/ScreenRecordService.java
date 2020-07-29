@@ -6,6 +6,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -17,6 +18,7 @@ import android.hardware.display.VirtualDisplay;
 import android.media.MediaRecorder;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -27,6 +29,7 @@ import androidx.annotation.RequiresApi;
 import android.os.ResultReceiver;
 import android.util.Log;
 
+import java.io.FileDescriptor;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -37,6 +40,7 @@ import java.util.Objects;
  * Copyright (c) 2019 . All rights reserved.
  */
 
+@SuppressWarnings("deprecation")
 public class ScreenRecordService extends Service {
 
     private static final String TAG = "ScreenRecordService";
@@ -67,11 +71,14 @@ public class ScreenRecordService extends Service {
     private int orientationHint;
 
     public final static String BUNDLED_LISTENER = "listener";
+    private Uri returnedUri = null;
+    private Intent mIntent;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
         //Get intent extras
+        mIntent = intent;
         byte[] notificationSmallIcon = intent.getByteArrayExtra("notificationSmallBitmap");
         String notificationTitle = intent.getStringExtra("notificationTitle");
         String notificationDescription = intent.getStringExtra("notificationDescription");
@@ -81,6 +88,10 @@ public class ScreenRecordService extends Service {
         mResultData = intent.getParcelableExtra("data");
         mScreenWidth = intent.getIntExtra("width", 0);
         mScreenHeight = intent.getIntExtra("height", 0);
+
+        if (intent.getStringExtra("mUri") != null) {
+            returnedUri = Uri.parse(intent.getStringExtra("mUri"));
+        }
 
         if (mScreenHeight == 0 || mScreenWidth == 0) {
             HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
@@ -174,8 +185,10 @@ public class ScreenRecordService extends Service {
         }
 
 
-        if (path == null) {
-            path = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
+        if (returnedUri == null) {
+            if (path == null) {
+                path = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
+            }
         }
 
         //Init MediaRecorder
@@ -397,7 +410,24 @@ public class ScreenRecordService extends Service {
         }
 
         mMediaRecorder.setVideoEncoder(videoEncoderAsInt);
-        mMediaRecorder.setOutputFile(path + "/" + name + ".mp4");
+
+
+        if (returnedUri != null) {
+            try {
+                ContentResolver contentResolver = getContentResolver();
+                FileDescriptor inputPFD = Objects.requireNonNull(contentResolver.openFileDescriptor(returnedUri, "rw")).getFileDescriptor();
+                mMediaRecorder.setOutputFile(inputPFD);
+            } catch (Exception e) {
+                ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                Bundle bundle = new Bundle();
+                bundle.putString("errorReason", Log.getStackTraceString(e));
+                if (receiver != null) {
+                    receiver.send(Activity.RESULT_OK, bundle);
+                }
+            }
+        }else{
+            mMediaRecorder.setOutputFile(filePath);
+        }
         mMediaRecorder.setVideoSize(mScreenWidth, mScreenHeight);
 
         if (!isCustomSettingsEnabled) {
@@ -416,7 +446,6 @@ public class ScreenRecordService extends Service {
 
         mMediaRecorder.prepare();
 
-        //return mediaRecorder;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -429,7 +458,17 @@ public class ScreenRecordService extends Service {
     public void onDestroy() {
         super.onDestroy();
         resetAll();
+        callOnComplete();
 
+    }
+
+    private void callOnComplete() {
+        ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+        Bundle bundle = new Bundle();
+        bundle.putString("onComplete", "Uri was passed");
+        if (receiver != null) {
+            receiver.send(Activity.RESULT_OK, bundle);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -28,6 +29,7 @@ import java.io.File;
  * Copyright (c) 2019 . All rights reserved.
  */
 
+@SuppressWarnings("deprecation")
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class HBRecorder implements MyListener {
     private int mScreenWidth;
@@ -70,6 +72,18 @@ public class HBRecorder implements MyListener {
     /*Set output path*/
     public void setOutputPath(String path) {
         outputPath = path;
+    }
+
+    Uri mUri;
+    boolean mWasUriSet = false;
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    public void setOutputUri(Uri uri){
+        mWasUriSet = true;
+        mUri = uri;
+    }
+
+    public boolean wasUriSet(){
+        return mWasUriSet;
     }
 
     /*Set file name*/
@@ -212,16 +226,21 @@ public class HBRecorder implements MyListener {
     /*Start recording service*/
     private void startService(Intent data) {
         try {
-            if (outputPath!=null){
-                File file = new File(outputPath);
-                String parent = file.getParent();
-                observer = new FileObserver(parent, activity, HBRecorder.this);
-            }else {
-                observer = new FileObserver(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)), activity, HBRecorder.this);
+            if (!mWasUriSet) {
+                if (outputPath != null) {
+                    File file = new File(outputPath);
+                    String parent = file.getParent();
+                    observer = new FileObserver(parent, activity, HBRecorder.this);
+                } else {
+                    observer = new FileObserver(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)), activity, HBRecorder.this);
+                }
+                observer.startWatching();
             }
-            observer.startWatching();
 
             Intent service = new Intent(context, ScreenRecordService.class);
+            if (mWasUriSet) {
+                service.putExtra("mUri", mUri.toString());
+            }
             service.putExtra("code", resultCode);
             service.putExtra("data", data);
             service.putExtra("audio", isAudioEnabled);
@@ -250,24 +269,28 @@ public class HBRecorder implements MyListener {
                 protected void onReceiveResult(int resultCode, Bundle resultData) {
                     super.onReceiveResult(resultCode, resultData);
                     if (resultCode == Activity.RESULT_OK) {
-                        String result = resultData.getString("errorReason");
-                        if (result != null) {
-                            Log.e("CALLED", "CALLED");
-                            observer.stopWatching();
-                            hbRecorderListener.HBRecorderOnError(100, result);
+                        String errorListener = resultData.getString("errorReason");
+                        String onComplete = resultData.getString("onComplete");
+
+                        if (errorListener != null) {
+                            if (!mWasUriSet) {
+                                observer.stopWatching();
+                            }
+                            hbRecorderListener.HBRecorderOnError(100, errorListener);
                             try {
                                 Intent mservice = new Intent(context, ScreenRecordService.class);
                                 context.stopService(mservice);
                             }catch (Exception e){
-
+                                // Can be ignored
                             }
 
+                        }else if (onComplete != null){
+                            //OnComplete for when Uri was passed
+                            hbRecorderListener.HBRecorderOnComplete();
                         }
                     }
                 }
             });
-
-
             context.startService(service);
         }catch (Exception e){
             hbRecorderListener.HBRecorderOnError(0, Log.getStackTraceString(e));
