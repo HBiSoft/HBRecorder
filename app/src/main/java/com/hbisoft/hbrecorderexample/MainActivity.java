@@ -206,6 +206,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         });
     }
 
+    @Override
+    public void HBRecorderOnStart() {
+        Log.e("HBRecorder", "HBRecorderOnStart called");
+    }
+
     //Listener for when the recording is saved successfully
     //This will be called after the file was created
     @Override

@@ -271,6 +271,7 @@ public class HBRecorder implements MyListener {
                     if (resultCode == Activity.RESULT_OK) {
                         String errorListener = resultData.getString("errorReason");
                         String onComplete = resultData.getString("onComplete");
+                        String onStart = resultData.getString("onStart");
 
                         if (errorListener != null) {
                             if (!mWasUriSet) {
@@ -287,6 +288,8 @@ public class HBRecorder implements MyListener {
                         }else if (onComplete != null){
                             //OnComplete for when Uri was passed
                             hbRecorderListener.HBRecorderOnComplete();
+                        }else if (onStart != null){
+                            hbRecorderListener.HBRecorderOnStart();
                         }
                     }
                 }

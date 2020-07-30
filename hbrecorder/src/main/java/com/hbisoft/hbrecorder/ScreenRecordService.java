@@ -226,6 +226,7 @@ public class ScreenRecordService extends Service {
                 receiver.send(Activity.RESULT_OK, bundle);
             }
         }
+
         mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
             @Override
             public void onError(MediaRecorder mediaRecorder, int i, int i1) {
@@ -242,6 +243,12 @@ public class ScreenRecordService extends Service {
         //Start Recording
         try {
             mMediaRecorder.start();
+            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+            Bundle bundle = new Bundle();
+            bundle.putString("onStart", "111");
+            if (receiver != null) {
+                receiver.send(Activity.RESULT_OK, bundle);
+            }
         } catch (Exception e) {
             // From the tests I've done, this can happen if another application is using the mic or if an unsupported video encoder was selected
             ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
