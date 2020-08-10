@@ -487,8 +487,6 @@ public class ScreenRecordService extends Service {
         }
         if (mMediaRecorder != null) {
             mMediaRecorder.setOnErrorListener(null);
-
-            mMediaProjection.stop();
             mMediaRecorder.reset();
         }
         if (mMediaProjection != null) {
