@@ -55,8 +55,6 @@ import java.util.Locale;
 *
 * 1. Implement HBRecorderListener by calling implements HBRecorderListener
 *    After this you have to implement the methods by pressing (Alt + Enter)
-*    This will create a method called HBRecorderOnComplete()
-*    This method will be called once the recording is done.
 *
 * 2. Declare HBRecorder
 *

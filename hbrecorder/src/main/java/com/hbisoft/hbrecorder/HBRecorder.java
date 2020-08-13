@@ -57,6 +57,7 @@ public class HBRecorder implements MyListener {
     private int videoBitrate = 40000000;
     private String outputFormat = "DEFAULT";
     private int orientation;
+    boolean wasOnErrorCalled = false;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HBRecorder(Context context, HBRecorderListener listener) {
@@ -277,6 +278,7 @@ public class HBRecorder implements MyListener {
                             if (!mWasUriSet) {
                                 observer.stopWatching();
                             }
+                            wasOnErrorCalled = true;
                             hbRecorderListener.HBRecorderOnError(100, errorListener);
                             try {
                                 Intent mservice = new Intent(context, ScreenRecordService.class);
@@ -287,7 +289,10 @@ public class HBRecorder implements MyListener {
 
                         }else if (onComplete != null){
                             //OnComplete for when Uri was passed
-                            hbRecorderListener.HBRecorderOnComplete();
+                            if (mWasUriSet && !wasOnErrorCalled) {
+                                hbRecorderListener.HBRecorderOnComplete();
+                            }
+                            wasOnErrorCalled = false;
                         }else if (onStart != null){
                             hbRecorderListener.HBRecorderOnStart();
                         }
