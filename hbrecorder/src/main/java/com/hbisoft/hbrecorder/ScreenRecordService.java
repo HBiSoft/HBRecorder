@@ -77,191 +77,219 @@ public class ScreenRecordService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        //Get intent extras
-        mIntent = intent;
-        byte[] notificationSmallIcon = intent.getByteArrayExtra("notificationSmallBitmap");
-        String notificationTitle = intent.getStringExtra("notificationTitle");
-        String notificationDescription = intent.getStringExtra("notificationDescription");
-        String notificationButtonText = intent.getStringExtra("notificationButtonText");
-        orientationHint = intent.getIntExtra("orientation", 400);
-        mResultCode = intent.getIntExtra("code", -1);
-        mResultData = intent.getParcelableExtra("data");
-        mScreenWidth = intent.getIntExtra("width", 0);
-        mScreenHeight = intent.getIntExtra("height", 0);
-
-        if (intent.getStringExtra("mUri") != null) {
-            returnedUri = Uri.parse(intent.getStringExtra("mUri"));
+        String pauseResumeAction = intent.getAction();
+        //Pause Recording
+        if (pauseResumeAction != null && pauseResumeAction.equals("pause")){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                pauseRecording();
+            }
         }
-
-        if (mScreenHeight == 0 || mScreenWidth == 0) {
-            HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
-            hbRecorderCodecInfo.setContext(this);
-            mScreenHeight = hbRecorderCodecInfo.getMaxSupportedHeight();
-            mScreenWidth = hbRecorderCodecInfo.getMaxSupportedWidth();
+        //Resume Recording
+        else if (pauseResumeAction != null && pauseResumeAction.equals("resume")){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                resumeRecording();
+            }
         }
+        //Start Recording
+        else {
+            //Get intent extras
+            mIntent = intent;
+            byte[] notificationSmallIcon = intent.getByteArrayExtra("notificationSmallBitmap");
+            String notificationTitle = intent.getStringExtra("notificationTitle");
+            String notificationDescription = intent.getStringExtra("notificationDescription");
+            String notificationButtonText = intent.getStringExtra("notificationButtonText");
+            orientationHint = intent.getIntExtra("orientation", 400);
+            mResultCode = intent.getIntExtra("code", -1);
+            mResultData = intent.getParcelableExtra("data");
+            mScreenWidth = intent.getIntExtra("width", 0);
+            mScreenHeight = intent.getIntExtra("height", 0);
 
-        mScreenDensity = intent.getIntExtra("density", 1);
-        isVideoHD = intent.getBooleanExtra("quality", true);
-        isAudioEnabled = intent.getBooleanExtra("audio", true);
-        path = intent.getStringExtra("path");
-        name = intent.getStringExtra("fileName");
-        String audioSource = intent.getStringExtra("audioSource");
-        String videoEncoder = intent.getStringExtra("videoEncoder");
-        videoFrameRate = intent.getIntExtra("videoFrameRate", 30);
-        videoBitrate = intent.getIntExtra("videoBitrate", 40000000);
+            if (intent.getStringExtra("mUri") != null) {
+                returnedUri = Uri.parse(intent.getStringExtra("mUri"));
+            }
 
-        if (audioSource != null) {
-            setAudioSourceAsInt(audioSource);
-        }
-        if (videoEncoder != null) {
-            setvideoEncoderAsInt(videoEncoder);
-        }
+            if (mScreenHeight == 0 || mScreenWidth == 0) {
+                HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
+                hbRecorderCodecInfo.setContext(this);
+                mScreenHeight = hbRecorderCodecInfo.getMaxSupportedHeight();
+                mScreenWidth = hbRecorderCodecInfo.getMaxSupportedWidth();
+            }
 
-        filePath = name;
-        audioBitrate = intent.getIntExtra("audioBitrate", 128000);
-        audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
-        String outputFormat = intent.getStringExtra("outputFormat");
-        if (outputFormat != null) {
-            setOutputformatAsInt(outputFormat);
-        }
+            mScreenDensity = intent.getIntExtra("density", 1);
+            isVideoHD = intent.getBooleanExtra("quality", true);
+            isAudioEnabled = intent.getBooleanExtra("audio", true);
+            path = intent.getStringExtra("path");
+            name = intent.getStringExtra("fileName");
+            String audioSource = intent.getStringExtra("audioSource");
+            String videoEncoder = intent.getStringExtra("videoEncoder");
+            videoFrameRate = intent.getIntExtra("videoFrameRate", 30);
+            videoBitrate = intent.getIntExtra("videoBitrate", 40000000);
 
-        isCustomSettingsEnabled = intent.getBooleanExtra("enableCustomSettings", false);
+            if (audioSource != null) {
+                setAudioSourceAsInt(audioSource);
+            }
+            if (videoEncoder != null) {
+                setvideoEncoderAsInt(videoEncoder);
+            }
 
-        //Set notification notification button text if developer did not
-        if (notificationButtonText == null) {
-            notificationButtonText = "STOP RECORDING";
-        }
-        //Set notification bitrate if developer did not
-        if (audioBitrate == 0) {
-            audioBitrate = 128000;
-        }
-        //Set notification sampling rate if developer did not
-        if (audioSamplingRate == 0) {
-            audioSamplingRate = 44100;
-        }
-        //Set notification title if developer did not
-        if (notificationTitle == null || notificationTitle.equals("")) {
-            notificationTitle = "Recording your screen";
-        }
-        //Set notification description if developer did not
-        if (notificationDescription == null || notificationDescription.equals("")) {
-            notificationDescription = "Drag down to stop the recording";
-        }
+            filePath = name;
+            audioBitrate = intent.getIntExtra("audioBitrate", 128000);
+            audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
+            String outputFormat = intent.getStringExtra("outputFormat");
+            if (outputFormat != null) {
+                setOutputformatAsInt(outputFormat);
+            }
 
-        //Notification
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            String channelId = "001";
-            String channelName = "RecordChannel";
-            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE);
-            channel.setLightColor(Color.BLUE);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            if (manager != null) {
-                manager.createNotificationChannel(channel);
-                Notification notification;
+            isCustomSettingsEnabled = intent.getBooleanExtra("enableCustomSettings", false);
 
-                Intent myIntent = new Intent(this, NotificationReceiver.class);
+            //Set notification notification button text if developer did not
+            if (notificationButtonText == null) {
+                notificationButtonText = "STOP RECORDING";
+            }
+            //Set notification bitrate if developer did not
+            if (audioBitrate == 0) {
+                audioBitrate = 128000;
+            }
+            //Set notification sampling rate if developer did not
+            if (audioSamplingRate == 0) {
+                audioSamplingRate = 44100;
+            }
+            //Set notification title if developer did not
+            if (notificationTitle == null || notificationTitle.equals("")) {
+                notificationTitle = "Recording your screen";
+            }
+            //Set notification description if developer did not
+            if (notificationDescription == null || notificationDescription.equals("")) {
+                notificationDescription = "Drag down to stop the recording";
+            }
 
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
+            //Notification
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                String channelId = "001";
+                String channelName = "RecordChannel";
+                NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE);
+                channel.setLightColor(Color.BLUE);
+                channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+                NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                if (manager != null) {
+                    manager.createNotificationChannel(channel);
+                    Notification notification;
 
-                Notification.Action action = new Notification.Action.Builder(
-                        Icon.createWithResource(this, android.R.drawable.presence_video_online),
-                        notificationButtonText,
-                        pendingIntent).build();
+                    Intent myIntent = new Intent(this, NotificationReceiver.class);
 
-                if (notificationSmallIcon != null) {
-                    Bitmap bmp = BitmapFactory.decodeByteArray(notificationSmallIcon, 0, notificationSmallIcon.length);
-                    //Modify notification badge
-                    notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(Icon.createWithBitmap(bmp)).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
 
-                } else {
-                    //Modify notification badge
-                    notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(R.drawable.icon).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
+                    Notification.Action action = new Notification.Action.Builder(
+                            Icon.createWithResource(this, android.R.drawable.presence_video_online),
+                            notificationButtonText,
+                            pendingIntent).build();
+
+                    if (notificationSmallIcon != null) {
+                        Bitmap bmp = BitmapFactory.decodeByteArray(notificationSmallIcon, 0, notificationSmallIcon.length);
+                        //Modify notification badge
+                        notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(Icon.createWithBitmap(bmp)).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
+
+                    } else {
+                        //Modify notification badge
+                        notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(R.drawable.icon).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
+                    }
+                    startForeground(101, notification);
                 }
-                startForeground(101, notification);
+            } else {
+                startForeground(101, new Notification());
             }
-        } else {
-            startForeground(101, new Notification());
-        }
 
 
-        if (returnedUri == null) {
-            if (path == null) {
-                path = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
+            if (returnedUri == null) {
+                if (path == null) {
+                    path = String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES));
+                }
             }
-        }
 
-        //Init MediaRecorder
-        try {
-            initRecorder();
-        } catch (Exception e) {
-            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
-            Bundle bundle = new Bundle();
-            bundle.putString("errorReason", Log.getStackTraceString(e));
-            if (receiver != null) {
-                receiver.send(Activity.RESULT_OK, bundle);
-            }
-        }
-
-        //Init MediaProjection
-        try {
-            initMediaProjection();
-        } catch (Exception e) {
-            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
-            Bundle bundle = new Bundle();
-            bundle.putString("errorReason", Log.getStackTraceString(e));
-            if (receiver != null) {
-                receiver.send(Activity.RESULT_OK, bundle);
-            }
-        }
-
-        //Init VirtualDisplay
-        try {
-            initVirtualDisplay();
-        } catch (Exception e) {
-            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
-            Bundle bundle = new Bundle();
-            bundle.putString("errorReason", Log.getStackTraceString(e));
-            if (receiver != null) {
-                receiver.send(Activity.RESULT_OK, bundle);
-            }
-        }
-
-        mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
-            @Override
-            public void onError(MediaRecorder mediaRecorder, int i, int i1) {
+            //Init MediaRecorder
+            try {
+                initRecorder();
+            } catch (Exception e) {
                 ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                 Bundle bundle = new Bundle();
-                bundle.putString("error", "38");
-                bundle.putString("errorReason", String.valueOf(i));
+                bundle.putString("errorReason", Log.getStackTraceString(e));
                 if (receiver != null) {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
             }
-        });
 
-        //Start Recording
-        try {
-            mMediaRecorder.start();
-            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
-            Bundle bundle = new Bundle();
-            bundle.putString("onStart", "111");
-            if (receiver != null) {
-                receiver.send(Activity.RESULT_OK, bundle);
+            //Init MediaProjection
+            try {
+                initMediaProjection();
+            } catch (Exception e) {
+                ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                Bundle bundle = new Bundle();
+                bundle.putString("errorReason", Log.getStackTraceString(e));
+                if (receiver != null) {
+                    receiver.send(Activity.RESULT_OK, bundle);
+                }
             }
-        } catch (Exception e) {
-            // From the tests I've done, this can happen if another application is using the mic or if an unsupported video encoder was selected
-            ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
-            Bundle bundle = new Bundle();
-            bundle.putString("error", "38");
-            bundle.putString("errorReason", Log.getStackTraceString(e));
-            if (receiver != null) {
-                receiver.send(Activity.RESULT_OK, bundle);
+
+            //Init VirtualDisplay
+            try {
+                initVirtualDisplay();
+            } catch (Exception e) {
+                ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                Bundle bundle = new Bundle();
+                bundle.putString("errorReason", Log.getStackTraceString(e));
+                if (receiver != null) {
+                    receiver.send(Activity.RESULT_OK, bundle);
+                }
+            }
+
+            mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
+                @Override
+                public void onError(MediaRecorder mediaRecorder, int i, int i1) {
+                    ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("error", "38");
+                    bundle.putString("errorReason", String.valueOf(i));
+                    if (receiver != null) {
+                        receiver.send(Activity.RESULT_OK, bundle);
+                    }
+                }
+            });
+
+            //Start Recording
+            try {
+                mMediaRecorder.start();
+                ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                Bundle bundle = new Bundle();
+                bundle.putString("onStart", "111");
+                if (receiver != null) {
+                    receiver.send(Activity.RESULT_OK, bundle);
+                }
+            } catch (Exception e) {
+                // From the tests I've done, this can happen if another application is using the mic or if an unsupported video encoder was selected
+                ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                Bundle bundle = new Bundle();
+                bundle.putString("error", "38");
+                bundle.putString("errorReason", Log.getStackTraceString(e));
+                if (receiver != null) {
+                    receiver.send(Activity.RESULT_OK, bundle);
+                }
             }
         }
 
 
         return Service.START_STICKY;
+    }
+
+    //Pause Recording
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void pauseRecording(){
+        mMediaRecorder.pause();
+    }
+
+    //Resume Recording
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void resumeRecording(){
+        mMediaRecorder.resume();
     }
 
     //Set output format as int based on what developer has provided

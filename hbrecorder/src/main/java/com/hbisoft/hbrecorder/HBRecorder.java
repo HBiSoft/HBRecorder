@@ -58,6 +58,8 @@ public class HBRecorder implements MyListener {
     private String outputFormat = "DEFAULT";
     private int orientation;
     boolean wasOnErrorCalled = false;
+    Intent service;
+    boolean isPaused = false;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HBRecorder(Context context, HBRecorderListener listener) {
@@ -184,6 +186,31 @@ public class HBRecorder implements MyListener {
         context.stopService(service);
     }
 
+    /*Pause screen recording*/
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void pauseScreenRecording(){
+        if (service != null){
+            isPaused = true;
+            service.setAction("pause");
+            context.startService(service);
+        }
+    }
+
+    /*Pause screen recording*/
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void resumeScreenRecording(){
+        if (service != null){
+            isPaused = false;
+            service.setAction("resume");
+            context.startService(service);
+        }
+    }
+
+    /*Check if video is paused*/
+    public boolean isRecordingPaused(){
+        return isPaused;
+    }
+
     /*Check if recording is in progress*/
     public boolean isBusyRecording() {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -238,7 +265,7 @@ public class HBRecorder implements MyListener {
                 observer.startWatching();
             }
 
-            Intent service = new Intent(context, ScreenRecordService.class);
+            service = new Intent(context, ScreenRecordService.class);
             if (mWasUriSet) {
                 service.putExtra("mUri", mUri.toString());
             }
