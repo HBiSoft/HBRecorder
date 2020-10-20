@@ -15,7 +15,7 @@
 
 <h2 align="center"><b>Demo:</b></h2>
 
-<p align="center">Download the demo app  <a href="https://github.com/HBiSoft/HBRecorder/releases/download/0.1.13/HBRecorderDemo.apk"><nobr>here</nobr></a></p>
+<p align="center">Download the demo app  <a href="https://github.com/HBiSoft/HBRecorder/releases/download/0.1.14/HBRecorderDemo.apk"><nobr>here</nobr></a></p>
 
 <p align="center"><img src="https://user-images.githubusercontent.com/35602540/66485516-3e78fd80-eaa9-11e9-9fea-f59bfa7c1389.gif" width="247" height="480" </p>
 
@@ -54,7 +54,7 @@ Implement library in your app level build.gradle:
 
 ```java
 dependencies {
-    implementation 'com.github.HBiSoft:HBRecorder:0.1.13'
+    implementation 'com.github.HBiSoft:HBRecorder:0.1.14'
 }
 ```
     
