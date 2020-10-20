@@ -157,6 +157,20 @@ public class HBRecorder implements MyListener {
         mScreenDensity = metrics.densityDpi;
     }
 
+    //Get default width
+    public int getDefaultWidth(){
+        HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
+        hbRecorderCodecInfo.setContext(context);
+        return hbRecorderCodecInfo.getMaxSupportedWidth();
+    }
+
+    //Get default height
+    public int getDefaultHeight(){
+        HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
+        hbRecorderCodecInfo.setContext(context);
+        return hbRecorderCodecInfo.getMaxSupportedHeight();
+    }
+
     //Set Custom Dimensions (NOTE - YOUR DEVICE MIGHT NOT SUPPORT THE SIZE YOU PASS IT)
     public void setScreenDimensions(int heightInPX, int widthInPX){
         mScreenHeight = heightInPX;

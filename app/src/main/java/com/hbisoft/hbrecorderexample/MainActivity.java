@@ -36,13 +36,19 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.hbisoft.hbrecorder.HBRecorder;
+import com.hbisoft.hbrecorder.HBRecorderCodecInfo;
 import com.hbisoft.hbrecorder.HBRecorderListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 
 /**
@@ -120,6 +126,44 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             if (hbRecorder.isBusyRecording()) {
                 startbtn.setText(R.string.stop_recording);
             }
+        }
+
+        // Examples of how to use the HBRecorderCodecInfo class to get codec info
+        HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            int mWidth = hbRecorder.getDefaultWidth();
+            int mHeight = hbRecorder.getDefaultHeight();
+            String mMimeType = "video/avc";
+            int mFPS = 30;
+            if (hbRecorderCodecInfo.isMimeTypeSupported(mMimeType)) {
+                String defaultVideoEncoder = hbRecorderCodecInfo.getDefaultVideoEncoderName(mMimeType);
+                boolean isSizeAndFramerateSupported = hbRecorderCodecInfo.isSizeAndFramerateSupported(mWidth, mHeight, mFPS, mMimeType, ORIENTATION_PORTRAIT);
+                Log.e("EXAMPLE", "THIS IS AN EXAMPLE OF HOW TO USE THE (HBRecorderCodecInfo) TO GET CODEC INFO:");
+                Log.e("HBRecorderCodecInfo", "defaultVideoEncoder for (" + mMimeType + ") -> " + defaultVideoEncoder);
+                Log.e("HBRecorderCodecInfo", "MaxSupportedFrameRate -> " + hbRecorderCodecInfo.getMaxSupportedFrameRate(mWidth, mHeight, mMimeType));
+                Log.e("HBRecorderCodecInfo", "MaxSupportedBitrate -> " + hbRecorderCodecInfo.getMaxSupportedBitrate(mMimeType));
+                Log.e("HBRecorderCodecInfo", "isSizeAndFramerateSupported @ Width = "+mWidth+" Height = "+mHeight+" FPS = "+mFPS+" -> " + isSizeAndFramerateSupported);
+                Log.e("HBRecorderCodecInfo", "isSizeSupported @ Width = "+mWidth+" Height = "+mHeight+" -> " + hbRecorderCodecInfo.isSizeSupported(mWidth, mHeight, mMimeType));
+                Log.e("HBRecorderCodecInfo", "Default Video Format = " + hbRecorderCodecInfo.getDefaultVideoFormat());
+
+                HashMap<String, String> supportedVideoMimeTypes = hbRecorderCodecInfo.getSupportedVideoMimeTypes();
+                for (Map.Entry<String, String> entry : supportedVideoMimeTypes.entrySet()) {
+                    Log.e("HBRecorderCodecInfo", "Supported VIDEO encoders and mime types : " + entry.getKey() + " -> " + entry.getValue());
+                }
+
+                HashMap<String, String> supportedAudioMimeTypes = hbRecorderCodecInfo.getSupportedAudioMimeTypes();
+                for (Map.Entry<String, String> entry : supportedAudioMimeTypes.entrySet()) {
+                    Log.e("HBRecorderCodecInfo", "Supported AUDIO encoders and mime types : " + entry.getKey() + " -> " + entry.getValue());
+                }
+
+                ArrayList<String> supportedVideoFormats = hbRecorderCodecInfo.getSupportedVideoFormats();
+                for (int j = 0; j < supportedVideoFormats.size(); j++) {
+                    Log.e("HBRecorderCodecInfo", "Available Video Formats : " + supportedVideoFormats.get(j));
+                }
+            }else{
+                Log.e("HBRecorderCodecInfo", "MimeType not supported");
+            }
+
         }
 
     }
