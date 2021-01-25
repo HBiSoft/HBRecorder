@@ -7,9 +7,9 @@ assignees: ''
 
 ---
 
-Before filing a bug:
+READ THIS BEFORE OPENING AN ISSUE:
 -----------------------
-- Please fill in all the information below.
+- Fill in all the information below.
 - Have a look at previously asked questions to see if your issue has been resolved.
 - Properly format your issue.
 - All issues should be asked in English.
