@@ -186,7 +186,7 @@ hbrecorder.setNotificationTitle(String);
 // Set notification description
 // Defaults to "Drag down to stop the recording"
 hbrecorder.setNotificationDescription(String);
-//Set notification stop button text
+// Set notification stop button text
 // Defaults to "STOP RECORDING"
 hbrecorder.setNotificationButtonText(String);
 // Set output orientation (in degrees)
@@ -205,7 +205,7 @@ Then you can set the following:
 hbRecorder.setAudioSource(String);
 //MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.VideoEncoder.html
 hbRecorder.setVideoEncoder(String);
-//If nothing is provided, it will select the heighest value supported by your device
+//If nothing is provided, it will select the highest value supported by your device
 hbRecorder.setScreenDimensions(HeightInPx, WidthInPx);
 //Frame rate is device dependent
 //You can use Camcoderprofile to determine the frame rate
@@ -217,6 +217,6 @@ hbRecorder.setOutputFormat(String);
 ```
 
 ---
-It is important to note that limitations are device dependent. It is best to set the video encoder to "DEFAULT" and let `MediaRecorder` pic the best encoder.
+It is important to note that limitations are device dependent. It is best to set the video encoder to "DEFAULT" and let `MediaRecorder` pick the best encoder.
 
-In the demo app you will have the option to test different video encoders, bitrate, frame rate and output format. If your device does not support any of the parameters you have selected `HBRecorderOnError` will be called.
+In the demo app you will have the option to test different video encoders, bitrate, frame rate and output formats. If your device does not support any of the parameters you have selected `HBRecorderOnError` will be called.
