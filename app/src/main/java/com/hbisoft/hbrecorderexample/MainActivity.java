@@ -24,8 +24,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.RadioGroup;
-import android.widget.Switch;
+import androidx.appcompat.widget.SwitchCompat;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
@@ -49,6 +50,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_REACHED_ERROR;
+import static com.hbisoft.hbrecorder.Constants.SETTINGS_ERROR;
 
 
 /**
@@ -79,7 +82,7 @@ import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 *
 * */
 
-@SuppressWarnings({"deprecation", "SameParameterValue"})
+@SuppressWarnings({"SameParameterValue"})
 public class MainActivity extends AppCompatActivity implements HBRecorderListener {
     //Permissions
     private static final int SCREEN_RECORD_REQUEST_CODE = 777;
@@ -104,7 +107,10 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     boolean isAudioEnabled = true;
 
     //Should custom settings be used
-    Switch custom_settings_switch;
+    SwitchCompat custom_settings_switch;
+
+    // Max file size in K
+    private EditText maxFileSizeInK;
 
 
     @Override
@@ -186,6 +192,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         radioGroup = findViewById(R.id.radio_group);
         recordAudioCheckBox = findViewById(R.id.audio_check_box);
         custom_settings_switch = findViewById(R.id.custom_settings_switch);
+        maxFileSizeInK = findViewById(R.id.max_file_size);
     }
 
     //Start Button OnClickListener
@@ -222,16 +229,13 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int checkedId) {
-                switch (checkedId) {
-                    case R.id.hd_button:
-                        //Ser HBRecorder to HD
-                        wasHDSelected = true;
 
-                        break;
-                    case R.id.sd_button:
-                        //Ser HBRecorder to SD
-                        wasHDSelected = false;
-                        break;
+                if (checkedId == R.id.hd_button) {
+                    //Ser HBRecorder to HD
+                    wasHDSelected = true;
+                } else if (checkedId == R.id.sd_button) {
+                    //Ser HBRecorder to SD
+                    wasHDSelected = false;
                 }
             }
         });
@@ -262,7 +266,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //Update gallery depending on SDK Level
             if (hbRecorder.wasUriSet()) {
-                updateGalleryUri();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                    updateGalleryUri();
+                } else {
+                    refreshGalleryFile();
+                }
             }else{
                 refreshGalleryFile();
             }
@@ -282,6 +290,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                 });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void updateGalleryUri(){
         contentValues.clear();
         contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
@@ -297,10 +306,12 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         //It is best to use device default
 
-        if (errorCode == 38) {
-            showLongToast("Some settings are not supported by your device");
+        if (errorCode == SETTINGS_ERROR) {
+            showLongToast(getString(R.string.settings_not_supported_message));
+        } else if ( errorCode == MAX_FILE_SIZE_REACHED_ERROR) {
+            showLongToast(getString(R.string.max_file_size_reached_message));
         } else {
-            showLongToast("HBRecorderOnError - See Log");
+            showLongToast(getString(R.string.general_recording_error_message));
             Log.e("HBRecorderOnError", reason);
         }
 
@@ -320,14 +331,13 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
             startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
-            startbtn.setText(R.string.stop_recording);
         } else {
             quickSettings();
             MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
             Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
             startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
-            startbtn.setText(R.string.stop_recording);
         }
+        startbtn.setText(R.string.stop_recording);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -477,6 +487,9 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             }
         }
 
+        // Max File Size
+        setRecorderMaxFileSize();
+
     }
 
     //Get/Set the selected settings
@@ -488,8 +501,21 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         hbRecorder.isAudioEnabled(isAudioEnabled);
         //Customise Notification
         hbRecorder.setNotificationSmallIcon(drawable2ByteArray(R.drawable.icon));
-        hbRecorder.setNotificationTitle("Recording your screen");
-        hbRecorder.setNotificationDescription("Drag down to stop the recording");
+        hbRecorder.setNotificationTitle(getString(R.string.stop_recording_notification_title));
+        hbRecorder.setNotificationDescription(getString(R.string.stop_recording_notification_message));
+        setRecorderMaxFileSize();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void setRecorderMaxFileSize() {
+        String s = maxFileSizeInK.getText().toString();
+        long maxFileSizeInKilobytes;
+        try {
+            maxFileSizeInKilobytes = Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            maxFileSizeInKilobytes = 0;
+        }
+        hbRecorder.setMaxFileSize(maxFileSizeInKilobytes * 1024); // Convert to bytes
 
     }
 

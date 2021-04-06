@@ -5,6 +5,7 @@
     <string name="record_audio">Record Audio</string>
     <string name="high_definition">High Definition</string>
     <string name="standard_definition">Standard Definition</string>
+    <string name="max_file_label">Max File Size (k)</string>
 
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
@@ -23,4 +24,13 @@
     <string name="key_video_encoder">key_video_encoder</string>
     <string name="key_audio_source">key_audio_source</string>
     <string name="key_output_format">key_output_format</string>
+    <string name="quick_settings_title">QUICK SETTINGS</string>
+    <string name="custom_settings_title">USE CUSTOM SETTINGS</string>
+    <string name="or_title">or</string>
+    <string name="max_file_hint">Blank == no max</string>
+    <string name="stop_recording_notification_message">Drag down to stop the recording</string>
+    <string name="stop_recording_notification_title">Recording your screen</string>
+    <string name="settings_not_supported_message">Some settings are not supported by your device</string>
+    <string name="max_file_size_reached_message">The file reached the designated max size</string>
+    <string name="general_recording_error_message">HBRecorderOnError - See Log</string>
 </resources>
