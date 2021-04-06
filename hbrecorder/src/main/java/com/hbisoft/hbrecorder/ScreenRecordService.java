@@ -534,11 +534,13 @@ public class ScreenRecordService extends Service {
     }
 
     private void callOnComplete() {
-        ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
-        Bundle bundle = new Bundle();
-        bundle.putString(ON_COMPLETE_KEY, ON_COMPLETE);
-        if (receiver != null) {
-            receiver.send(Activity.RESULT_OK, bundle);
+        if ( mIntent != null ) {
+            ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+            Bundle bundle = new Bundle();
+            bundle.putString(ON_COMPLETE_KEY, ON_COMPLETE);
+            if (receiver != null) {
+                receiver.send(Activity.RESULT_OK, bundle);
+            }
         }
     }
 
