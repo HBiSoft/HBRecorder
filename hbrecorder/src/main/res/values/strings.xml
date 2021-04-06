@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">HBRecorder</string>
+    <string name="max_file_reached">File size max has been reached.</string>
+    <string name="stop_recording_notification_message">Drag down to stop the recording</string>
+    <string name="stop_recording_notification_title">Recording your screen</string>
 </resources>

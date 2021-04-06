@@ -24,12 +24,19 @@ import android.util.Log;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 
+import static com.hbisoft.hbrecorder.Constants.ERROR_KEY;
+import static com.hbisoft.hbrecorder.Constants.ERROR_REASON_KEY;
+import static com.hbisoft.hbrecorder.Constants.GENERAL_ERROR;
+import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_KEY;
+import static com.hbisoft.hbrecorder.Constants.NO_SPECIFIED_MAX_SIZE;
+import static com.hbisoft.hbrecorder.Constants.ON_COMPLETE_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_START_KEY;
+
 /**
  * Created by HBiSoft on 13 Aug 2019
  * Copyright (c) 2019 . All rights reserved.
  */
 
-@SuppressWarnings("deprecation")
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class HBRecorder implements MyListener {
     private int mScreenWidth;
@@ -57,6 +64,7 @@ public class HBRecorder implements MyListener {
     private int videoBitrate = 40000000;
     private String outputFormat = "DEFAULT";
     private int orientation;
+    private long maxFileSize = NO_SPECIFIED_MAX_SIZE; // Default no max size
     boolean wasOnErrorCalled = false;
     Intent service;
     boolean isPaused = false;
@@ -83,6 +91,10 @@ public class HBRecorder implements MyListener {
     public void setOutputUri(Uri uri){
         mWasUriSet = true;
         mUri = uri;
+    }
+
+    public void setMaxFileSize(long fileSize) {
+        maxFileSize = fileSize;
     }
 
     public boolean wasUriSet(){
@@ -311,19 +323,23 @@ public class HBRecorder implements MyListener {
                 protected void onReceiveResult(int resultCode, Bundle resultData) {
                     super.onReceiveResult(resultCode, resultData);
                     if (resultCode == Activity.RESULT_OK) {
-                        String errorListener = resultData.getString("errorReason");
-                        String onComplete = resultData.getString("onComplete");
-                        String onStart = resultData.getString("onStart");
-
+                        String errorListener = resultData.getString(ERROR_REASON_KEY);
+                        String onComplete = resultData.getString(ON_COMPLETE_KEY);
+                        int onStartCode = resultData.getInt(ON_START_KEY);
+                        int errorCode = resultData.getInt(ERROR_KEY);
                         if (errorListener != null) {
                             if (!mWasUriSet) {
                                 observer.stopWatching();
                             }
                             wasOnErrorCalled = true;
-                            hbRecorderListener.HBRecorderOnError(100, errorListener);
+                            if ( errorCode > 0 ) {
+                                hbRecorderListener.HBRecorderOnError(errorCode, errorListener);
+                            } else {
+                                hbRecorderListener.HBRecorderOnError(GENERAL_ERROR, errorListener);
+                            }
                             try {
-                                Intent mservice = new Intent(context, ScreenRecordService.class);
-                                context.stopService(mservice);
+                                Intent mService = new Intent(context, ScreenRecordService.class);
+                                context.stopService(mService);
                             }catch (Exception e){
                                 // Can be ignored
                             }
@@ -334,12 +350,14 @@ public class HBRecorder implements MyListener {
                                 hbRecorderListener.HBRecorderOnComplete();
                             }
                             wasOnErrorCalled = false;
-                        }else if (onStart != null){
+                        }else if (onStartCode != 0){
                             hbRecorderListener.HBRecorderOnStart();
                         }
                     }
                 }
             });
+            // Max file size
+            service.putExtra(MAX_FILE_SIZE_KEY, maxFileSize);
             context.startService(service);
         }catch (Exception e){
             hbRecorderListener.HBRecorderOnError(0, Log.getStackTraceString(e));
