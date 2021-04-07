@@ -35,16 +35,27 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Objects;
 
+import static com.hbisoft.hbrecorder.Constants.ERROR_KEY;
+import static com.hbisoft.hbrecorder.Constants.ERROR_REASON_KEY;
+import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_REACHED_ERROR;
+import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_KEY;
+import static com.hbisoft.hbrecorder.Constants.NO_SPECIFIED_MAX_SIZE;
+import static com.hbisoft.hbrecorder.Constants.ON_COMPLETE;
+import static com.hbisoft.hbrecorder.Constants.ON_COMPLETE_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_START;
+import static com.hbisoft.hbrecorder.Constants.ON_START_KEY;
+import static com.hbisoft.hbrecorder.Constants.SETTINGS_ERROR;
+
 /**
  * Created by HBiSoft on 13 Aug 2019
  * Copyright (c) 2019 . All rights reserved.
  */
 
-@SuppressWarnings("deprecation")
 public class ScreenRecordService extends Service {
 
     private static final String TAG = "ScreenRecordService";
-
+    private long maxFileSize = NO_SPECIFIED_MAX_SIZE;
+    private boolean hasMaxFileBeenReached = false;
     private int mScreenWidth;
     private int mScreenHeight;
     private int mScreenDensity;
@@ -93,7 +104,9 @@ public class ScreenRecordService extends Service {
         //Start Recording
         else {
             //Get intent extras
+            hasMaxFileBeenReached = false;
             mIntent = intent;
+            maxFileSize = intent.getLongExtra(MAX_FILE_SIZE_KEY, NO_SPECIFIED_MAX_SIZE);
             byte[] notificationSmallIcon = intent.getByteArrayExtra("notificationSmallBitmap");
             String notificationTitle = intent.getStringExtra("notificationTitle");
             String notificationDescription = intent.getStringExtra("notificationDescription");
@@ -137,7 +150,7 @@ public class ScreenRecordService extends Service {
             audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
             String outputFormat = intent.getStringExtra("outputFormat");
             if (outputFormat != null) {
-                setOutputformatAsInt(outputFormat);
+                setOutputFormatAsInt(outputFormat);
             }
 
             isCustomSettingsEnabled = intent.getBooleanExtra("enableCustomSettings", false);
@@ -156,11 +169,11 @@ public class ScreenRecordService extends Service {
             }
             //Set notification title if developer did not
             if (notificationTitle == null || notificationTitle.equals("")) {
-                notificationTitle = "Recording your screen";
+                notificationTitle = getString(R.string.stop_recording_notification_title);
             }
             //Set notification description if developer did not
             if (notificationDescription == null || notificationDescription.equals("")) {
-                notificationDescription = "Drag down to stop the recording";
+                notificationDescription = getString(R.string.stop_recording_notification_message);
             }
 
             //Notification
@@ -212,7 +225,7 @@ public class ScreenRecordService extends Service {
             } catch (Exception e) {
                 ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                 Bundle bundle = new Bundle();
-                bundle.putString("errorReason", Log.getStackTraceString(e));
+                bundle.putString(ERROR_REASON_KEY, Log.getStackTraceString(e));
                 if (receiver != null) {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
@@ -224,7 +237,7 @@ public class ScreenRecordService extends Service {
             } catch (Exception e) {
                 ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                 Bundle bundle = new Bundle();
-                bundle.putString("errorReason", Log.getStackTraceString(e));
+                bundle.putString(ERROR_REASON_KEY, Log.getStackTraceString(e));
                 if (receiver != null) {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
@@ -236,7 +249,7 @@ public class ScreenRecordService extends Service {
             } catch (Exception e) {
                 ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                 Bundle bundle = new Bundle();
-                bundle.putString("errorReason", Log.getStackTraceString(e));
+                bundle.putString(ERROR_REASON_KEY, Log.getStackTraceString(e));
                 if (receiver != null) {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
@@ -244,13 +257,34 @@ public class ScreenRecordService extends Service {
 
             mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
                 @Override
-                public void onError(MediaRecorder mediaRecorder, int i, int i1) {
+                public void onError(MediaRecorder mediaRecorder, int what, int extra) {
+                    if ( what == 268435556 && hasMaxFileBeenReached) {
+                        // Benign error b/c recording is too short and has no frames. See SO: https://stackoverflow.com/questions/40616466/mediarecorder-stop-failed-1007
+                        return;
+                    }
                     ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                     Bundle bundle = new Bundle();
-                    bundle.putString("error", "38");
-                    bundle.putString("errorReason", String.valueOf(i));
+                    bundle.putInt(ERROR_KEY, SETTINGS_ERROR);
+                    bundle.putString(ERROR_REASON_KEY, String.valueOf(what));
                     if (receiver != null) {
                         receiver.send(Activity.RESULT_OK, bundle);
+                    }
+                }
+            });
+
+            mMediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
+                @Override
+                public void onInfo(MediaRecorder mr, int what, int extra) {
+                    if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED) {
+                        hasMaxFileBeenReached = true;
+                        Log.i(TAG,String.format(Locale.US,"onInfoListen what : %d | extra %d", what, extra));
+                        ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+                        Bundle bundle = new Bundle();
+                        bundle.putInt(ERROR_KEY, MAX_FILE_SIZE_REACHED_ERROR);
+                        bundle.putString(ERROR_REASON_KEY, getString(R.string.max_file_reached));
+                        if (receiver != null) {
+                            receiver.send(Activity.RESULT_OK, bundle);
+                        }
                     }
                 }
             });
@@ -260,7 +294,7 @@ public class ScreenRecordService extends Service {
                 mMediaRecorder.start();
                 ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                 Bundle bundle = new Bundle();
-                bundle.putString("onStart", "111");
+                bundle.putInt(ON_START_KEY, ON_START);
                 if (receiver != null) {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
@@ -268,8 +302,8 @@ public class ScreenRecordService extends Service {
                 // From the tests I've done, this can happen if another application is using the mic or if an unsupported video encoder was selected
                 ResultReceiver receiver = intent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                 Bundle bundle = new Bundle();
-                bundle.putString("error", "38");
-                bundle.putString("errorReason", Log.getStackTraceString(e));
+                bundle.putInt(ERROR_KEY, SETTINGS_ERROR);
+                bundle.putString(ERROR_REASON_KEY, Log.getStackTraceString(e));
                 if (receiver != null) {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
@@ -294,16 +328,13 @@ public class ScreenRecordService extends Service {
 
     //Set output format as int based on what developer has provided
     //It is important to provide one of the following and nothing else.
-    private void setOutputformatAsInt(String outputFormat) {
+    private void setOutputFormatAsInt(String outputFormat) {
         switch (outputFormat) {
             case "DEFAULT":
                 outputFormatAsInt = 0;
                 break;
             case "THREE_GPP":
                 outputFormatAsInt = 1;
-                break;
-            case "MPEG_4":
-                outputFormatAsInt = 2;
                 break;
             case "AMR_NB":
                 outputFormatAsInt = 3;
@@ -323,6 +354,7 @@ public class ScreenRecordService extends Service {
             case "OGG":
                 outputFormatAsInt = 11;
                 break;
+            case "MPEG_4":
             default:
                 outputFormatAsInt = 2;
         }
@@ -455,7 +487,7 @@ public class ScreenRecordService extends Service {
             } catch (Exception e) {
                 ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
                 Bundle bundle = new Bundle();
-                bundle.putString("errorReason", Log.getStackTraceString(e));
+                bundle.putString(ERROR_REASON_KEY, Log.getStackTraceString(e));
                 if (receiver != null) {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
@@ -478,6 +510,10 @@ public class ScreenRecordService extends Service {
             mMediaRecorder.setVideoFrameRate(videoFrameRate);
         }
 
+        // Catch approaching file limit
+        if ( maxFileSize > NO_SPECIFIED_MAX_SIZE) {
+            mMediaRecorder.setMaxFileSize(maxFileSize); // in bytes
+        }
 
         mMediaRecorder.prepare();
 
@@ -498,11 +534,13 @@ public class ScreenRecordService extends Service {
     }
 
     private void callOnComplete() {
-        ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
-        Bundle bundle = new Bundle();
-        bundle.putString("onComplete", "Uri was passed");
-        if (receiver != null) {
-            receiver.send(Activity.RESULT_OK, bundle);
+        if ( mIntent != null ) {
+            ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+            Bundle bundle = new Bundle();
+            bundle.putString(ON_COMPLETE_KEY, ON_COMPLETE);
+            if (receiver != null) {
+                receiver.send(Activity.RESULT_OK, bundle);
+            }
         }
     }
 

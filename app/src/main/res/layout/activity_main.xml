@@ -1,24 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:ignore="Overdraw">
 
+    <LinearLayout
+        android:id="@+id/max_filesize_linear_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true">
+
+        <EditText
+            android:id="@+id/max_file_size"
+            android:inputType="numberSigned"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:hint="@string/max_file_hint"
+            android:importantForAutofill="no" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/max_file_label"
+            android:layout_marginTop="10dp"/>
+
+    </LinearLayout>
+
     <ImageView
         android:layout_width="300dp"
         android:layout_height="1dp"
+        android:layout_below="@+id/max_filesize_linear_layout"
         android:layout_centerHorizontal="true"
         android:background="#b1b1b1"
         android:layout_marginTop="40dp"
         android:id="@+id/hl"
-        android:alpha="0.5"/>
+        android:alpha="0.5"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="QUICK SETTINGS"
+        android:text="@string/quick_settings_title"
         android:layout_below="@+id/hl"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
@@ -61,8 +87,7 @@
         android:layout_marginTop="30dp"
         android:checked="true"
         android:text="@string/record_audio"
-        app:theme="@style/CheckboxStyle"
-        />
+        app:theme="@style/CheckboxStyle"/>
 
     <ImageView
         android:layout_width="300dp"
@@ -72,12 +97,13 @@
         android:background="#b1b1b1"
         android:layout_marginTop="40dp"
         android:id="@+id/hl1"
-        android:alpha="0.5"/>
+        android:alpha="0.5"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="or"
+        android:text="@string/or_title"
         android:gravity="center"
         android:textStyle="bold"
         android:layout_below="@+id/hl1"
@@ -95,13 +121,13 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="USE CUSTOM SETTINGS"
+            android:text="@string/custom_settings_title"
             android:textStyle="bold"
             android:gravity="center"
             android:layout_centerVertical="true"
             android:id="@+id/tvCustom"/>
 
-        <Switch
+        <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/custom_settings_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
