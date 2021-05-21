@@ -191,6 +191,8 @@ hbrecorder.setNotificationDescription(String);
 hbrecorder.setNotificationButtonText(String);
 // Set output orientation (in degrees)
 hbrecorder.setOrientationHint(int);
+// Set max output file size
+hbrecorder.setMaxFileSize(long);
 ```
 
 Custom setting:
