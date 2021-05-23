@@ -192,7 +192,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         radioGroup = findViewById(R.id.radio_group);
         recordAudioCheckBox = findViewById(R.id.audio_check_box);
         custom_settings_switch = findViewById(R.id.custom_settings_switch);
-        maxFileSizeInK = findViewById(R.id.max_file_size);
     }
 
     //Start Button OnClickListener
@@ -487,9 +486,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             }
         }
 
-        // Max File Size
-        setRecorderMaxFileSize();
-
     }
 
     //Get/Set the selected settings
@@ -503,10 +499,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         hbRecorder.setNotificationSmallIcon(drawable2ByteArray(R.drawable.icon));
         hbRecorder.setNotificationTitle(getString(R.string.stop_recording_notification_title));
         hbRecorder.setNotificationDescription(getString(R.string.stop_recording_notification_message));
-        setRecorderMaxFileSize();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    // Example of how to set the max file size
+
+    /*@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setRecorderMaxFileSize() {
         String s = maxFileSizeInK.getText().toString();
         long maxFileSizeInKilobytes;
@@ -517,7 +514,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         }
         hbRecorder.setMaxFileSize(maxFileSizeInKilobytes * 1024); // Convert to bytes
 
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

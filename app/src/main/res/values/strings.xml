@@ -27,7 +27,7 @@
     <string name="quick_settings_title">QUICK SETTINGS</string>
     <string name="custom_settings_title">USE CUSTOM SETTINGS</string>
     <string name="or_title">or</string>
-    <string name="max_file_hint">Blank == no max</string>
+    <string name="max_file_hint">Enter max file size</string>
     <string name="stop_recording_notification_message">Drag down to stop the recording</string>
     <string name="stop_recording_notification_title">Recording your screen</string>
     <string name="settings_not_supported_message">Some settings are not supported by your device</string>

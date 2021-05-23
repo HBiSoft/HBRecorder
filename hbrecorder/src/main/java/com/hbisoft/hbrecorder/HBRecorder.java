@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 
 import androidx.annotation.DrawableRes;
@@ -68,6 +69,8 @@ public class HBRecorder implements MyListener {
     boolean wasOnErrorCalled = false;
     Intent service;
     boolean isPaused = false;
+    boolean isMaxDurationSet = false;
+    int maxDuration = 0;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HBRecorder(Context context, HBRecorderListener listener) {
@@ -93,6 +96,13 @@ public class HBRecorder implements MyListener {
         mUri = uri;
     }
 
+    /*Set max duration in seconds */
+    public void setMaxDuration(int seconds){
+        isMaxDurationSet = true;
+        maxDuration = seconds * 1000;
+    }
+
+    /*Set max file size in kb*/
     public void setMaxFileSize(long fileSize) {
         maxFileSize = fileSize;
     }
@@ -328,6 +338,8 @@ public class HBRecorder implements MyListener {
                         int onStartCode = resultData.getInt(ON_START_KEY);
                         int errorCode = resultData.getInt(ERROR_KEY);
                         if (errorListener != null) {
+                            //Stop countdown if it was set
+                            stopCountDown();
                             if (!mWasUriSet) {
                                 observer.stopWatching();
                             }
@@ -345,6 +357,8 @@ public class HBRecorder implements MyListener {
                             }
 
                         }else if (onComplete != null){
+                            //Stop countdown if it was set
+                            stopCountDown();
                             //OnComplete for when Uri was passed
                             if (mWasUriSet && !wasOnErrorCalled) {
                                 hbRecorderListener.HBRecorderOnComplete();
@@ -352,6 +366,10 @@ public class HBRecorder implements MyListener {
                             wasOnErrorCalled = false;
                         }else if (onStartCode != 0){
                             hbRecorderListener.HBRecorderOnStart();
+                            //Check if max duration was set and start count down
+                            if (isMaxDurationSet){
+                                startCountdown();
+                            }
                         }
                     }
                 }
@@ -363,6 +381,49 @@ public class HBRecorder implements MyListener {
             hbRecorderListener.HBRecorderOnError(0, Log.getStackTraceString(e));
         }
 
+    }
+
+    /*CountdownTimer for when max duration is set*/
+    Countdown countDown = null;
+    private void startCountdown() {
+        countDown = new Countdown(maxDuration, 1000, 0) {
+            @Override
+            public void onTick(long timeLeft) {
+                // Could add a callback to provide the time to the user
+                // Will add if users request this
+            }
+
+            @Override
+            public void onFinished() {
+                onTick(0);
+                // Since the timer is running on a different thread
+                // UI chances should be called from the UI Thread
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            stopScreenRecording();
+                            observer.stopWatching();
+                            hbRecorderListener.HBRecorderOnComplete();
+                        } catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onStopCalled() {
+                // Currently unused, but might be helpful in the future
+            }
+        };
+        countDown.start();
+    }
+
+    private void stopCountDown(){
+        if (countDown != null) {
+            countDown.stop();
+        }
     }
 
     /*Complete callback method*/
