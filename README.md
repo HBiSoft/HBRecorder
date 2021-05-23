@@ -193,7 +193,7 @@ hbrecorder.setNotificationButtonText(String);
 hbrecorder.setOrientationHint(int);
 // Set max output file size
 hbrecorder.setMaxFileSize(long);
-// Set max time (in milliseconds - 1000 millisecconds = 1 second)
+// Set max time (in seconds)
 hbRecorder.setMaxDuration(int);
 ```
 
