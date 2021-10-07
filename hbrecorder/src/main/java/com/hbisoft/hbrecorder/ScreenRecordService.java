@@ -189,8 +189,14 @@ public class ScreenRecordService extends Service {
                     Notification notification;
 
                     Intent myIntent = new Intent(this, NotificationReceiver.class);
+                    PendingIntent pendingIntent;
 
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
+                    if (Build.VERSION.SDK_INT >= 31){
+                        pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, PendingIntent.FLAG_IMMUTABLE);
+                    }else{
+                        pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
+
+                    }
 
                     Notification.Action action = new Notification.Action.Builder(
                             Icon.createWithResource(this, android.R.drawable.presence_video_online),
