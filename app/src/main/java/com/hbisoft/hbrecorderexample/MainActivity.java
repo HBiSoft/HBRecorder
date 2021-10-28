@@ -201,9 +201,16 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             public void onClick(View v) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     //first check if permissions was granted
-                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
-                        hasPermissions = true;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                            hasPermissions = true;
+                        }
+                    } else {
+                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                            hasPermissions = true;
+                        }
                     }
+
                     if (hasPermissions) {
                         //check if recording is in progress
                         //and stop it if it is
@@ -557,16 +564,21 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                 }
                 break;
             case PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     hasPermissions = true;
-                    //Permissions was provided
-                    //Start screen recording
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        startRecordingScreen();
-                    }
+                    startRecordingScreen();
                 } else {
-                    hasPermissions = false;
-                    showLongToast("No permission for " + Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        hasPermissions = true;
+                        //Permissions was provided
+                        //Start screen recording
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            startRecordingScreen();
+                        }
+                    } else {
+                        hasPermissions = false;
+                        showLongToast("No permission for " + Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    }
                 }
                 break;
             default:
