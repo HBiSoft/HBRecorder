@@ -503,7 +503,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         hbRecorder.recordHDVideo(wasHDSelected);
         hbRecorder.isAudioEnabled(isAudioEnabled);
         //Customise Notification
-        hbRecorder.setNotificationSmallIcon(drawable2ByteArray(R.drawable.icon));
+        hbRecorder.setNotificationSmallIcon(R.drawable.icon);
+        //hbRecorder.setNotificationSmallIconVector(R.drawable.ic_baseline_videocam_24);
         hbRecorder.setNotificationTitle(getString(R.string.stop_recording_notification_title));
         hbRecorder.setNotificationDescription(getString(R.string.stop_recording_notification_message));
     }

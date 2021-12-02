@@ -58,6 +58,7 @@ public class HBRecorder implements MyListener {
     private FileObserver observer;
     private final HBRecorderListener hbRecorderListener;
     private byte[] byteArray;
+    private int vectorDrawable = 0;
     private String audioSource = "MIC";
     private String videoEncoder = "DEFAULT";
     private boolean enableCustomSettings = false;
@@ -260,7 +261,7 @@ public class HBRecorder implements MyListener {
         return false;
     }
 
-    /*Change notification icon*/
+    /*Change notification icon Drawable*/
     public void setNotificationSmallIcon(@DrawableRes int drawable) {
         Bitmap icon = BitmapFactory.decodeResource(context.getResources(), drawable);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -268,7 +269,12 @@ public class HBRecorder implements MyListener {
         byteArray = stream.toByteArray();
     }
 
-    /*Change notification icon*/
+    /*Change notification icon using Vector Drawable*/
+    public void setNotificationSmallIconVector(@DrawableRes int VectorDrawable) {
+        vectorDrawable = VectorDrawable;
+    }
+
+    /*Change notification icon using byte[]*/
     public void setNotificationSmallIcon(byte[] bytes)  {
         byteArray = bytes;
     }
@@ -318,6 +324,7 @@ public class HBRecorder implements MyListener {
             service.putExtra("audioBitrate", audioBitrate);
             service.putExtra("audioSamplingRate", audioSamplingRate);
             service.putExtra("notificationSmallBitmap", byteArray);
+            service.putExtra("notificationSmallVector", vectorDrawable);
             service.putExtra("notificationTitle", notificationTitle);
             service.putExtra("notificationDescription", notificationDescription);
             service.putExtra("notificationButtonText", notificationButtonText);

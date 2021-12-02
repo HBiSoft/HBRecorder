@@ -108,6 +108,7 @@ public class ScreenRecordService extends Service {
             mIntent = intent;
             maxFileSize = intent.getLongExtra(MAX_FILE_SIZE_KEY, NO_SPECIFIED_MAX_SIZE);
             byte[] notificationSmallIcon = intent.getByteArrayExtra("notificationSmallBitmap");
+            int notificationSmallVector = intent.getIntExtra("notificationSmallVector", 0);
             String notificationTitle = intent.getStringExtra("notificationTitle");
             String notificationDescription = intent.getStringExtra("notificationDescription");
             String notificationButtonText = intent.getStringExtra("notificationButtonText");
@@ -208,7 +209,11 @@ public class ScreenRecordService extends Service {
                         //Modify notification badge
                         notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(Icon.createWithBitmap(bmp)).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
 
-                    } else {
+                    } else if (notificationSmallVector != 0){
+                        notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(notificationSmallVector).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
+                    }
+
+                    else {
                         //Modify notification badge
                         notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(R.drawable.icon).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
                     }
