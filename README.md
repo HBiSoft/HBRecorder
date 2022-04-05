@@ -29,7 +29,6 @@
 
 <p align="center">Let other developers know what version you have tested:</p></br></br>
 
-<p align="center"><a href="https://api.gh-polls.com/poll/01FZW9VBV3FVV2A2C56SWH9MC5/Android%2012/vote"><img src="https://api.gh-polls.com/poll/01FZW9VBV3FVV2A2C56SWH9MC5/Android%2012" alt=""></a></p>
 <p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2011" alt=""></a></p>
 <p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%2010" alt=""></a></p>
 <p align="center"><a href="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209/vote"><img src="https://api.gh-polls.com/poll/01EEA8FRQ42BVQ4XB6JGDAM8BH/Android%209" alt=""></a></p>
