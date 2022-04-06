@@ -88,17 +88,27 @@ public class ScreenRecordService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        String pauseResumeAction = intent.getAction();
-        //Pause Recording
-        if (pauseResumeAction != null && pauseResumeAction.equals("pause")){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                pauseRecording();
-            }
+        boolean isAction = false;
+
+        //Check if there was an action called
+        if (intent != null && intent.getAction() != null){
+            isAction = true;
         }
-        //Resume Recording
-        else if (pauseResumeAction != null && pauseResumeAction.equals("resume")){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                resumeRecording();
+
+        //If there was an action, check what action it was
+        //Called when recording should be paused or resumed
+        if (isAction){
+            //Pause Recording
+            if (intent.getAction().equals("pause")) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    pauseRecording();
+                }
+            }
+            //Resume Recording
+            else if (intent.getAction().equals("resume")){
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    resumeRecording();
+                }
             }
         }
         //Start Recording
