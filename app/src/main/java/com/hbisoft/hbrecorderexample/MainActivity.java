@@ -596,7 +596,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     //Set file path or Uri depending on SDK version
                     setOutputPath();
                     //Start screen recording
-                    hbRecorder.startScreenRecording(data, resultCode, this);
+                    hbRecorder.startScreenRecording(data, resultCode);
 
                 }
             }

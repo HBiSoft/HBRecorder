@@ -131,7 +131,7 @@ protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
         if (resultCode == RESULT_OK) {
             //Start screen recording
-            hbRecorder.startScreenRecording(data, resultCode, this);
+            hbRecorder.startScreenRecording(data, resultCode);
 
         }
     }

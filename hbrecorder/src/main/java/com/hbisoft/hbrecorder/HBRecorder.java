@@ -17,6 +17,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.ResultReceiver;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -47,7 +48,6 @@ public class HBRecorder implements MyListener {
     private int resultCode;
     private boolean isAudioEnabled = true;
     private boolean isVideoHDEnabled = true;
-    private Activity activity;
     private String outputPath;
     private String fileName;
     private String notificationTitle;
@@ -211,9 +211,8 @@ public class HBRecorder implements MyListener {
     }
 
     /*Start screen recording*/
-    public void startScreenRecording(Intent data, int resultCode, Activity activity) {
+    public void startScreenRecording(Intent data, int resultCode) {
         this.resultCode = resultCode;
-        this.activity = activity;
         startService(data);
     }
 
@@ -300,9 +299,9 @@ public class HBRecorder implements MyListener {
                 if (outputPath != null) {
                     File file = new File(outputPath);
                     String parent = file.getParent();
-                    observer = new FileObserver(parent, activity, HBRecorder.this);
+                    observer = new FileObserver(parent, HBRecorder.this);
                 } else {
-                    observer = new FileObserver(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)), activity, HBRecorder.this);
+                    observer = new FileObserver(String.valueOf(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES)), HBRecorder.this);
                 }
                 observer.startWatching();
             }
@@ -405,7 +404,8 @@ public class HBRecorder implements MyListener {
                 onTick(0);
                 // Since the timer is running on a different thread
                 // UI chances should be called from the UI Thread
-                activity.runOnUiThread(new Runnable() {
+
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
                         try {
