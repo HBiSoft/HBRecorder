@@ -32,6 +32,8 @@ import static com.hbisoft.hbrecorder.Constants.GENERAL_ERROR;
 import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_KEY;
 import static com.hbisoft.hbrecorder.Constants.NO_SPECIFIED_MAX_SIZE;
 import static com.hbisoft.hbrecorder.Constants.ON_COMPLETE_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_PAUSE_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_RESUME_KEY;
 import static com.hbisoft.hbrecorder.Constants.ON_START_KEY;
 
 /**
@@ -375,6 +377,16 @@ public class HBRecorder implements MyListener {
                             //Check if max duration was set and start count down
                             if (isMaxDurationSet){
                                 startCountdown();
+                            }
+                        }
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            String onPause = resultData.getString(ON_PAUSE_KEY);
+                            String onResume = resultData.getString(ON_RESUME_KEY);
+                            if (onPause != null) {
+                                hbRecorderListener.HBRecorderOnPause();
+                            } else if (onResume != null) {
+                                hbRecorderListener.HBRecorderOnResume();
                             }
                         }
                     }
