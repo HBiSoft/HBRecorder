@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -96,6 +97,36 @@ public class HBRecorder implements MyListener {
         mWasUriSet = true;
         mUri = uri;
     }
+
+    // WILL IMPLEMENT THIS AT A LATER STAGE
+    // DEVELOPERS ARE WELCOME TO LOOK AT THIS AND CREATE A PULL REQUEST
+    /*Mute microphone*/
+    /*public void setMicMuted(boolean state){
+        if (context!=null) {
+            try {
+                ((AudioManager)context.getSystemService(Context.AUDIO_SERVICE)).setStreamMute(AudioManager.STREAM_SYSTEM,true);
+
+                AudioManager myAudioManager = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+
+                // get the working mode and keep it
+                int workingAudioMode = myAudioManager.getMode();
+
+                myAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+
+                // change mic state only if needed
+                if (myAudioManager.isMicrophoneMute() != state) {
+                    myAudioManager.setMicrophoneMute(state);
+                }
+
+                // set back the original working mode
+                myAudioManager.setMode(workingAudioMode);
+            }catch (Exception e){
+                Log.e("HBRecorder", "Muting mic failed with the following exception:");
+                e.printStackTrace();
+            }
+
+        }
+    }*/
 
     /*Set max duration in seconds */
     public void setMaxDuration(int seconds){
