@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     //Permissions
     private static final int SCREEN_RECORD_REQUEST_CODE = 777;
     private static final int PERMISSION_REQ_ID_RECORD_AUDIO = 22;
+    private static final int PERMISSION_REQ_POST_NOTIFICATIONS = 33;
     private static final int PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE = PERMISSION_REQ_ID_RECORD_AUDIO + 1;
     private boolean hasPermissions = false;
 
@@ -196,36 +197,38 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
     //Start Button OnClickListener
     private void setOnClickListeners() {
-        startbtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    //first check if permissions was granted
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
-                            hasPermissions = true;
-                        }
-                    } else {
-                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
-                            hasPermissions = true;
-                        }
+        startbtn.setOnClickListener(v -> {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                //first check if permissions was granted
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS) && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                        hasPermissions = true;
                     }
-
-                    if (hasPermissions) {
-                        //check if recording is in progress
-                        //and stop it if it is
-                        if (hbRecorder.isBusyRecording()) {
-                            hbRecorder.stopScreenRecording();
-                            startbtn.setText(R.string.start_recording);
-                        }
-                        //else start recording
-                        else {
-                            startRecordingScreen();
-                        }
+                }
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                        hasPermissions = true;
                     }
                 } else {
-                    showLongToast("This library requires API 21>");
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                        hasPermissions = true;
+                    }
                 }
+
+                if (hasPermissions) {
+                    //check if recording is in progress
+                    //and stop it if it is
+                    if (hbRecorder.isBusyRecording()) {
+                        hbRecorder.stopScreenRecording();
+                        startbtn.setText(R.string.start_recording);
+                    }
+                    //else start recording
+                    else {
+                        startRecordingScreen();
+                    }
+                }
+            } else {
+                showLongToast("This library requires API 21>");
             }
         });
     }
@@ -258,6 +261,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         });
     }
 
+    // Called when recording starts
     @Override
     public void HBRecorderOnStart() {
         Log.e("HBRecorder", "HBRecorderOnStart called");
@@ -284,25 +288,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void refreshGalleryFile() {
-        MediaScannerConnection.scanFile(this,
-                new String[]{hbRecorder.getFilePath()}, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                    public void onScanCompleted(String path, Uri uri) {
-                        Log.i("ExternalStorage", "Scanned " + path + ":");
-                        Log.i("ExternalStorage", "-> uri=" + uri);
-                    }
-                });
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void updateGalleryUri(){
-        contentValues.clear();
-        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
-        getContentResolver().update(mUri, contentValues, null, null);
-    }
-
+    // Called when error occurs
     @Override
     public void HBRecorderOnError(int errorCode, String reason) {
         // Error 38 happens when
@@ -323,6 +309,37 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         startbtn.setText(R.string.start_recording);
 
+    }
+
+    // Called when recording has been paused
+    @Override
+    public void HBRecorderOnPause() {
+        // Called when recording was paused
+    }
+
+    // Calld when recording has resumed
+    @Override
+    public void HBRecorderOnResume() {
+        // Called when recording was resumed
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void refreshGalleryFile() {
+        MediaScannerConnection.scanFile(this,
+                new String[]{hbRecorder.getFilePath()}, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.i("ExternalStorage", "Scanned " + path + ":");
+                        Log.i("ExternalStorage", "-> uri=" + uri);
+                    }
+                });
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.Q)
+    private void updateGalleryUri(){
+        contentValues.clear();
+        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
+        getContentResolver().update(mUri, contentValues, null, null);
     }
 
     //Start recording screen
@@ -347,6 +364,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    // Example of how to set custom settings
     private void customSettings() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -557,6 +575,14 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
+            case PERMISSION_REQ_POST_NOTIFICATIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO);
+                } else {
+                    hasPermissions = false;
+                    showLongToast("No permission for " + Manifest.permission.POST_NOTIFICATIONS);
+                }
+                break;
             case PERMISSION_REQ_ID_RECORD_AUDIO:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);

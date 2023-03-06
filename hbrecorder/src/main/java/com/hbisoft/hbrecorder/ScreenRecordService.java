@@ -42,6 +42,10 @@ import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_KEY;
 import static com.hbisoft.hbrecorder.Constants.NO_SPECIFIED_MAX_SIZE;
 import static com.hbisoft.hbrecorder.Constants.ON_COMPLETE;
 import static com.hbisoft.hbrecorder.Constants.ON_COMPLETE_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_PAUSE;
+import static com.hbisoft.hbrecorder.Constants.ON_PAUSE_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_RESUME;
+import static com.hbisoft.hbrecorder.Constants.ON_RESUME_KEY;
 import static com.hbisoft.hbrecorder.Constants.ON_START;
 import static com.hbisoft.hbrecorder.Constants.ON_START_KEY;
 import static com.hbisoft.hbrecorder.Constants.SETTINGS_ERROR;
@@ -341,12 +345,24 @@ public class ScreenRecordService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void pauseRecording(){
         mMediaRecorder.pause();
+        ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+        Bundle bundle = new Bundle();
+        bundle.putString(ON_PAUSE_KEY, ON_PAUSE);
+        if (receiver != null) {
+            receiver.send(Activity.RESULT_OK, bundle);
+        }
     }
 
     //Resume Recording
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void resumeRecording(){
         mMediaRecorder.resume();
+        ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+        Bundle bundle = new Bundle();
+        bundle.putString(ON_RESUME_KEY, ON_RESUME);
+        if (receiver != null) {
+            receiver.send(Activity.RESULT_OK, bundle);
+        }
     }
 
     //Set output format as int based on what developer has provided

@@ -34,6 +34,8 @@ import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_KEY;
 import static com.hbisoft.hbrecorder.Constants.NO_SPECIFIED_MAX_SIZE;
 import static com.hbisoft.hbrecorder.Constants.ON_COMPLETE_KEY;
 import static com.hbisoft.hbrecorder.Constants.ON_START_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_PAUSE_KEY;
+import static com.hbisoft.hbrecorder.Constants.ON_RESUME_KEY;
 
 /**
  * Created by HBiSoft on 13 Aug 2019
@@ -374,6 +376,7 @@ public class HBRecorder implements MyListener {
                         String onComplete = resultData.getString(ON_COMPLETE_KEY);
                         int onStartCode = resultData.getInt(ON_START_KEY);
                         int errorCode = resultData.getInt(ERROR_KEY);
+                        // There was an error
                         if (errorListener != null) {
                             //Stop countdown if it was set
                             stopCountDown();
@@ -393,7 +396,9 @@ public class HBRecorder implements MyListener {
                                 // Can be ignored
                             }
 
-                        }else if (onComplete != null){
+                        }
+                        // OnComplete was called
+                        else if (onComplete != null){
                             //Stop countdown if it was set
                             stopCountDown();
                             //OnComplete for when Uri was passed
@@ -401,11 +406,23 @@ public class HBRecorder implements MyListener {
                                 hbRecorderListener.HBRecorderOnComplete();
                             }
                             wasOnErrorCalled = false;
-                        }else if (onStartCode != 0){
+                        }
+                        // OnStart was called
+                        else if (onStartCode != 0){
                             hbRecorderListener.HBRecorderOnStart();
                             //Check if max duration was set and start count down
                             if (isMaxDurationSet){
                                 startCountdown();
+                            }
+                        }
+                        // OnPause/onResume was called
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            String onPause = resultData.getString(ON_PAUSE_KEY);
+                            String onResume = resultData.getString(ON_RESUME_KEY);
+                            if (onPause != null) {
+                                hbRecorderListener.HBRecorderOnPause();
+                            } else if (onResume != null) {
+                                hbRecorderListener.HBRecorderOnResume();
                             }
                         }
                     }
