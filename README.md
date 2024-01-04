@@ -104,7 +104,9 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-```   
+<!-- For SDK 34 -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+```
 
 That's it, `HBRecorder` is now ready to be used.
 

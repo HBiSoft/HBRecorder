@@ -9,6 +9,7 @@ import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -22,10 +23,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 
 import androidx.annotation.RequiresApi;
 
+import android.os.Looper;
 import android.os.ResultReceiver;
 import android.util.Log;
 
@@ -231,10 +234,10 @@ public class ScreenRecordService extends Service {
                             //Modify notification badge
                             notification = new Notification.Builder(getApplicationContext(), channelId).setOngoing(true).setSmallIcon(R.drawable.icon).setContentTitle(notificationTitle).setContentText(notificationDescription).addAction(action).build();
                         }
-                        startForeground(101, notification);
+                        startFgs(101, notification);
                     }
                 } else {
-                    startForeground(101, new Notification());
+                    startFgs(101, new Notification());
                 }
 
 
@@ -467,6 +470,11 @@ public class ScreenRecordService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initMediaProjection() {
         mMediaProjection = ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).getMediaProjection(mResultCode, mResultData);
+        Handler handler = new Handler(Looper.getMainLooper());
+        mMediaProjection.registerCallback(new MediaProjection.Callback() {
+            // Nothing
+            // We don't use it but register it to avoid runtime error from SDK 34+.
+        }, handler);
     }
 
     //Return the output file path as string
@@ -561,6 +569,14 @@ public class ScreenRecordService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initVirtualDisplay() {
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(TAG, mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mMediaRecorder.getSurface(), null, null);
+    }
+
+    private void startFgs(int notificationId, Notification notificaton) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(notificationId, notificaton, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+        } else {
+            startForeground(notificationId, notificaton);
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
