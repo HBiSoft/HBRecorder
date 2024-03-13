@@ -20,6 +20,12 @@ android {
     }
     namespace 'com.hbisoft.hbrecorder'
 
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -36,9 +42,10 @@ afterEvaluate {
         publications {
             // Creates a Maven publication called "release".
             release(MavenPublication) {
-                from components.properties.release
+                from components.release
                 groupId = 'com.github.HBiSoft'
                 artifactId = 'HBRecorder'
+                version = '3.0.2'
             }
         }
     }
