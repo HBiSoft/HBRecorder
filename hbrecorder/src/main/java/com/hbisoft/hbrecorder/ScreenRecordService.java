@@ -214,7 +214,7 @@ public class ScreenRecordService extends Service {
                         if (Build.VERSION.SDK_INT >= 31) {
                             pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, PendingIntent.FLAG_IMMUTABLE);
                         } else {
-                            pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
+                            pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, PendingIntent.FLAG_IMMUTABLE);
 
                         }
 
@@ -346,7 +346,7 @@ public class ScreenRecordService extends Service {
 
     //Pause Recording
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void pauseRecording(){
+    private void pauseRecording() {
         mMediaRecorder.pause();
         ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
         Bundle bundle = new Bundle();
@@ -358,7 +358,7 @@ public class ScreenRecordService extends Service {
 
     //Resume Recording
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void resumeRecording(){
+    private void resumeRecording() {
         mMediaRecorder.resume();
         ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
         Bundle bundle = new Bundle();
@@ -469,12 +469,24 @@ public class ScreenRecordService extends Service {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initMediaProjection() {
-        mMediaProjection = ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).getMediaProjection(mResultCode, mResultData);
+        mMediaProjection = ((MediaProjectionManager) Objects
+                .requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE)))
+                .getMediaProjection(mResultCode, mResultData);
         Handler handler = new Handler(Looper.getMainLooper());
-        mMediaProjection.registerCallback(new MediaProjection.Callback() {
-            // Nothing
-            // We don't use it but register it to avoid runtime error from SDK 34+.
-        }, handler);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            mMediaProjection.registerCallback(new MediaProjection.Callback() {
+                @Override
+                public void onStop() {
+                    super.onStop();
+                }
+            }, handler);
+        } else {
+            mMediaProjection.registerCallback(new MediaProjection.Callback() {
+                // Nothing
+                // We don't use it but register it to avoid runtime error from SDK 34+.
+            }, handler);
+        }
     }
 
     //Return the output file path as string
@@ -513,7 +525,7 @@ public class ScreenRecordService extends Service {
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
         mMediaRecorder.setOutputFormat(outputFormatAsInt);
 
-        if (orientationHint != 400){
+        if (orientationHint != 400) {
             mMediaRecorder.setOrientationHint(orientationHint);
         }
 
@@ -539,7 +551,7 @@ public class ScreenRecordService extends Service {
                     receiver.send(Activity.RESULT_OK, bundle);
                 }
             }
-        }else{
+        } else {
             mMediaRecorder.setOutputFile(filePath);
         }
         mMediaRecorder.setVideoSize(mScreenWidth, mScreenHeight);
@@ -558,7 +570,7 @@ public class ScreenRecordService extends Service {
         }
 
         // Catch approaching file limit
-        if ( maxFileSize > NO_SPECIFIED_MAX_SIZE) {
+        if (maxFileSize > NO_SPECIFIED_MAX_SIZE) {
             mMediaRecorder.setMaxFileSize(maxFileSize); // in bytes
         }
 
@@ -568,6 +580,10 @@ public class ScreenRecordService extends Service {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initVirtualDisplay() {
+        if (mMediaProjection == null) {
+            Log.d(TAG, "initVirtualDisplay: " + " Media projection is not initialized properly.");
+            return;
+        }
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(TAG, mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mMediaRecorder.getSurface(), null, null);
     }
 
@@ -589,7 +605,7 @@ public class ScreenRecordService extends Service {
     }
 
     private void callOnComplete() {
-        if ( mIntent != null ) {
+        if (mIntent != null) {
             ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
             Bundle bundle = new Bundle();
             bundle.putString(ON_COMPLETE_KEY, ON_COMPLETE);
