@@ -16,6 +16,7 @@ import android.os.Environment;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.os.Handler;
 import android.os.Looper;
@@ -79,6 +80,7 @@ public class HBRecorder implements MyListener {
     private int elapsedTime = 0;
     private Handler elapsedTimeHandler = new Handler(Looper.getMainLooper());
     private Runnable elapsedTimeRunnable;
+    public static final String MSG_BROADCAST_ELAPSED_TIME_IN_SECOND = "ELAPSED_SCREEN_RECORDING_TIME_BROADCAST";
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HBRecorder(Context context, HBRecorderListener listener) {
@@ -118,6 +120,7 @@ public class HBRecorder implements MyListener {
             @Override
             public void run() {
                 elapsedTime++;
+                sendElapsedTimeToFragment(context, elapsedTime);
                 elapsedTimeHandler.postDelayed(this, 1000);
             }
         };
@@ -128,6 +131,12 @@ public class HBRecorder implements MyListener {
         if (elapsedTimeRunnable != null) {
             elapsedTimeHandler.removeCallbacks(elapsedTimeRunnable);
         }
+    }
+
+    public static void sendElapsedTimeToFragment(Context context, long elapsedTime) {
+        Intent intent = new Intent(MSG_BROADCAST_ELAPSED_TIME_IN_SECOND);
+        intent.putExtra("elapsed_time", elapsedTime);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     // WILL IMPLEMENT THIS AT A LATER STAGE
