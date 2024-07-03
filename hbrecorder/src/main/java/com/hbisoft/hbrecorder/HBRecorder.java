@@ -75,6 +75,10 @@ public class HBRecorder implements MyListener {
     boolean isPaused = false;
     boolean isMaxDurationSet = false;
     int maxDuration = 0;
+    // Added elapsedTime variable
+    private int elapsedTime = 0;
+    private Handler elapsedTimeHandler = new Handler(Looper.getMainLooper());
+    private Runnable elapsedTimeRunnable;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public HBRecorder(Context context, HBRecorderListener listener) {
@@ -98,6 +102,32 @@ public class HBRecorder implements MyListener {
     public void setOutputUri(Uri uri){
         mWasUriSet = true;
         mUri = uri;
+    }
+
+    // Helper methods for elapsed time
+    public int getElapsedTime() {
+        return elapsedTime;
+    }
+
+    public void resetElapsedTime() {
+        elapsedTime = 0;
+    }
+
+    private void startElapsedTimeCounter() {
+        elapsedTimeRunnable = new Runnable() {
+            @Override
+            public void run() {
+                elapsedTime++;
+                elapsedTimeHandler.postDelayed(this, 1000);
+            }
+        };
+        elapsedTimeHandler.post(elapsedTimeRunnable);
+    }
+
+    private void stopElapsedTimeCounter() {
+        if (elapsedTimeRunnable != null) {
+            elapsedTimeHandler.removeCallbacks(elapsedTimeRunnable);
+        }
     }
 
     // WILL IMPLEMENT THIS AT A LATER STAGE
@@ -247,12 +277,15 @@ public class HBRecorder implements MyListener {
     public void startScreenRecording(Intent data, int resultCode) {
         this.resultCode = resultCode;
         startService(data);
+        startElapsedTimeCounter();
     }
 
     /*Stop screen recording*/
     public void stopScreenRecording() {
         Intent service = new Intent(context, ScreenRecordService.class);
         context.stopService(service);
+        stopElapsedTimeCounter();
+        resetElapsedTime();
     }
 
     /*Pause screen recording*/
@@ -262,6 +295,7 @@ public class HBRecorder implements MyListener {
             isPaused = true;
             service.setAction("pause");
             context.startService(service);
+            stopElapsedTimeCounter();
         }
     }
 
@@ -272,6 +306,7 @@ public class HBRecorder implements MyListener {
             isPaused = false;
             service.setAction("resume");
             context.startService(service);
+            startElapsedTimeCounter();
         }
     }
 
@@ -392,6 +427,8 @@ public class HBRecorder implements MyListener {
                             try {
                                 Intent mService = new Intent(context, ScreenRecordService.class);
                                 context.stopService(mService);
+                                stopElapsedTimeCounter();
+                                resetElapsedTime();
                             }catch (Exception e){
                                 // Can be ignored
                             }
@@ -401,6 +438,8 @@ public class HBRecorder implements MyListener {
                         else if (onComplete != null){
                             //Stop countdown if it was set
                             stopCountDown();
+                            stopElapsedTimeCounter();
+                            resetElapsedTime();
                             //OnComplete for when Uri was passed
                             if (mWasUriSet && !wasOnErrorCalled) {
                                 hbRecorderListener.HBRecorderOnComplete();
@@ -433,6 +472,8 @@ public class HBRecorder implements MyListener {
             context.startService(service);
         }catch (Exception e){
             hbRecorderListener.HBRecorderOnError(0, Log.getStackTraceString(e));
+            stopElapsedTimeCounter();
+            resetElapsedTime();
         }
 
     }
