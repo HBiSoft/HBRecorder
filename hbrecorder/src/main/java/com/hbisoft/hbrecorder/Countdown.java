@@ -23,7 +23,7 @@ public abstract class Countdown extends Timer {
 
     public void start() {
         wasStarted = true;
-        this.scheduleAtFixedRate(task, delay, interval);
+        this.schedule(task, delay, interval);
     }
 
     public void stop() {

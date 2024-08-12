@@ -471,10 +471,19 @@ public class ScreenRecordService extends Service {
     private void initMediaProjection() {
         mMediaProjection = ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).getMediaProjection(mResultCode, mResultData);
         Handler handler = new Handler(Looper.getMainLooper());
-        mMediaProjection.registerCallback(new MediaProjection.Callback() {
-            // Nothing
-            // We don't use it but register it to avoid runtime error from SDK 34+.
-        }, handler);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            mMediaProjection.registerCallback(new MediaProjection.Callback() {
+                @Override
+                public void onStop() {
+                    super.onStop();
+                }
+            }, handler);
+        } else {
+            mMediaProjection.registerCallback(new MediaProjection.Callback() {
+                // Nothing
+                // We don't use it but register it to avoid runtime error from SDK 34+.
+            }, handler);
+        }
     }
 
     //Return the output file path as string
@@ -568,6 +577,10 @@ public class ScreenRecordService extends Service {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initVirtualDisplay() {
+        if (mMediaProjection == null) {
+            Log.d(TAG, "initVirtualDisplay: " + " Media projection is not initialized properly.");
+            return;
+        }
         mVirtualDisplay = mMediaProjection.createVirtualDisplay(TAG, mScreenWidth, mScreenHeight, mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, mMediaRecorder.getSurface(), null, null);
     }
 
