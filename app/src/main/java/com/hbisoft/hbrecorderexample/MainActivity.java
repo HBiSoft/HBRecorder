@@ -363,6 +363,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         startbtn.setText(R.string.stop_recording);
     }
 
+    String output_format;
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     // Example of how to set custom settings
     private void customSettings() {
@@ -493,7 +494,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         }
 
         //Output Format
-        String output_format = prefs.getString("key_output_format", null);
+        output_format = prefs.getString("key_output_format", null);
         if (output_format != null) {
             switch (output_format) {
                 case "0":
@@ -646,7 +647,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "HBRecorder");
             contentValues.put(MediaStore.Video.Media.TITLE, filename);
             contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
-            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, getMimeTypeForOutputFormat(output_format));
             mUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
             //FILE NAME SHOULD BE THE SAME
             hbRecorder.setFileName(filename);
@@ -655,6 +656,32 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             createFolder();
             hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
         }
+    }
+
+    // Passing the MIME_TYPE to ContentValues() depending on what output format was selected
+    // This is just to demonstrate for the demo app - more can be added
+    private String getMimeTypeForOutputFormat(String outputFormat) {
+        String mimetype = "video/mp4";
+        switch (outputFormat) {
+            // We do not know what the devices DEFAULT (0) is
+            // For the sake of this demo app we will set it to mp4
+            case "0":
+                mimetype = "video/mp4";
+                break;
+            case "1":
+                mimetype = "video/mp4";
+                break;
+            case "2":
+                mimetype = "video/3gpp";
+                break;
+            case "3":
+                mimetype = "video/webm";
+                break;
+            default:
+                mimetype = "video/mp4";
+                break;
+        }
+        return mimetype;
     }
 
     //Generate a timestamp to be used as a file name

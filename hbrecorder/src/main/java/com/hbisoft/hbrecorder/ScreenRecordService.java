@@ -72,6 +72,8 @@ public class ScreenRecordService extends Service {
     private boolean isAudioEnabled;
     private String path;
 
+    private String outputFormat;
+
     private MediaProjection mMediaProjection;
     private MediaRecorder mMediaRecorder;
     private VirtualDisplay mVirtualDisplay;
@@ -168,7 +170,7 @@ public class ScreenRecordService extends Service {
                 filePath = name;
                 audioBitrate = intent.getIntExtra("audioBitrate", 128000);
                 audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
-                String outputFormat = intent.getStringExtra("outputFormat");
+                outputFormat = intent.getStringExtra("outputFormat");
                 if (outputFormat != null) {
                     setOutputFormatAsInt(outputFormat);
                 }
@@ -402,6 +404,27 @@ public class ScreenRecordService extends Service {
         }
     }
 
+    private String getExtension(String outputFormat) {
+        switch (outputFormat) {
+            case "THREE_GPP":
+                return ".3gp";
+            case "AMR_NB":
+                return ".amr";
+            case "AMR_WB":
+                return ".amr";
+            case "AAC_ADTS":
+                return ".aac";
+            case "MPEG_2_TS":
+                return ".ts";
+            case "WEBM":
+                return ".webm";
+            case "OGG":
+                return ".ogg";
+            default:
+                return ".mp4"; // Default to .mp4 for unknown formats
+        }
+    }
+
     //Set video encoder as int based on what developer has provided
     //It is important to provide one of the following and nothing else.
     private void setvideoEncoderAsInt(String encoder) {
@@ -549,6 +572,13 @@ public class ScreenRecordService extends Service {
                 }
             }
         }else{
+            if (outputFormat!=null){
+                filePath = path + "/" + name + getExtension(outputFormat);
+                fileName = name + getExtension(outputFormat);
+            }else {
+                filePath = path + "/" + name + ".mp4";
+                fileName = name + ".mp4";
+            }
             mMediaRecorder.setOutputFile(filePath);
         }
         mMediaRecorder.setVideoSize(mScreenWidth, mScreenHeight);
