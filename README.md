@@ -1,4 +1,6 @@
-**<p align="center">As you can imagine, creating and maintaining a library like this takes a lot of time.</br> If you would like to thank me, you can do so below:</p>**
+**<p align="center">Creating and maintaining a library like this requires a significant amount of time and effort.</p>**
+
+**<p align="center">If you’d like to show your appreciation, you can do so below:</p>**
 
 <p align="center"><a href="https://www.buymeacoffee.com/HBiSoft" target="_blank" ><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important;width: 164px !important;box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 3px 2px 0px rgba(190, 190, 190, 0.5) !important;" ></a></p>
 
