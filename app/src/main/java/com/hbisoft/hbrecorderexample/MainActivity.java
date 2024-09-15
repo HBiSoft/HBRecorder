@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private static final int PERMISSION_REQ_ID_RECORD_AUDIO = 22;
     private static final int PERMISSION_REQ_POST_NOTIFICATIONS = 33;
     private static final int PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE = PERMISSION_REQ_ID_RECORD_AUDIO + 1;
+    private static final int PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION = PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE + 1;
     private boolean hasPermissions = false;
 
     //Declare HBRecorder
@@ -199,31 +200,36 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private void setOnClickListeners() {
         startbtn.setOnClickListener(v -> {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                //first check if permissions was granted
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS) && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                // first check if permissions were granted
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // SDK 34
+                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
+                            && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
+                            && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
                         hasPermissions = true;
                     }
-                }
-                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // SDK 33
+                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
+                            && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                        hasPermissions = true;
+                    }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
                         hasPermissions = true;
                     }
                 } else {
-                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
+                            && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
                         hasPermissions = true;
                     }
                 }
 
                 if (hasPermissions) {
-                    //check if recording is in progress
-                    //and stop it if it is
+                    // check if recording is in progress and stop it if it is
                     if (hbRecorder.isBusyRecording()) {
                         hbRecorder.stopScreenRecording();
                         startbtn.setText(R.string.start_recording);
-                    }
-                    //else start recording
-                    else {
+                    } else {
+                        // else start recording
                         startRecordingScreen();
                     }
                 }
@@ -572,6 +578,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     //Handle permissions
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -598,22 +605,27 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     startRecordingScreen();
                 } else {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        hasPermissions = true;
-                        //Permissions was provided
-                        //Start screen recording
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            startRecordingScreen();
-                        }
+                        checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION);
                     } else {
                         hasPermissions = false;
                         showLongToast("No permission for " + Manifest.permission.WRITE_EXTERNAL_STORAGE);
                     }
                 }
                 break;
+            case PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    hasPermissions = true;
+                    startRecordingScreen();
+                } else {
+                    hasPermissions = false;
+                    showLongToast("No permission for " + Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION);
+                }
+                break;
             default:
                 break;
         }
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -647,7 +659,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "HBRecorder");
             contentValues.put(MediaStore.Video.Media.TITLE, filename);
             contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
-            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, getMimeTypeForOutputFormat(output_format));
+            if (output_format != null) {
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, getMimeTypeForOutputFormat(output_format));
+            }else {
+                contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
+            }
             mUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
             //FILE NAME SHOULD BE THE SAME
             hbRecorder.setFileName(filename);
