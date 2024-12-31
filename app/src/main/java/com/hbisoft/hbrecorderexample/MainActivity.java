@@ -91,7 +91,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private static final int PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE = PERMISSION_REQ_ID_RECORD_AUDIO + 1;
     private static final int PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION = PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE + 1;
     private boolean hasPermissions = false;
-    private boolean hasAudioPermissions = false;
 
     //Declare HBRecorder
     private HBRecorder hbRecorder;
@@ -208,13 +207,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                                 && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
                                 && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
                             hasPermissions = true;
-                            hasAudioPermissions = true;
                         }
                     }else{
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
                                 && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
                             hasPermissions = true;
-                            hasAudioPermissions = false;
                         }
                     }
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // SDK 33
@@ -222,7 +219,6 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
                                 && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
                             hasPermissions = true;
-                            hasAudioPermissions = true;
                         }
                     }else{
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)) {
@@ -231,16 +227,23 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     }
 
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                    if (isAudioEnabled) {
+                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                            hasPermissions = true;
+                        }
+                    } else {
                         hasPermissions = true;
-                        hasAudioPermissions = true;
-
                     }
                 } else {
-                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
-                            && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
-                        hasPermissions = true;
-                        hasAudioPermissions = true;
+                    if (isAudioEnabled) {
+                        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
+                                && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                            hasPermissions = true;
+                        }
+                    } else {
+                        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                            hasPermissions = true;
+                        }
                     }
                 }
 
@@ -251,9 +254,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                         startbtn.setText(R.string.start_recording);
                     } else {
                         // else start recording
-                        if (hasAudioPermissions && isAudioEnabled) {
-                            startRecordingScreen();
-                        }
+                        startRecordingScreen();
                     }
                 }
             } else {
