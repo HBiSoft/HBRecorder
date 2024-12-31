@@ -91,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     private static final int PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE = PERMISSION_REQ_ID_RECORD_AUDIO + 1;
     private static final int PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION = PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE + 1;
     private boolean hasPermissions = false;
+    private boolean hasAudioPermissions = false;
 
     //Declare HBRecorder
     private HBRecorder hbRecorder;
@@ -202,24 +203,44 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // first check if permissions were granted
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // SDK 34
-                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
-                            && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
-                            && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
-                        hasPermissions = true;
+                    if (isAudioEnabled) {
+                        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
+                                && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
+                                && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
+                            hasPermissions = true;
+                            hasAudioPermissions = true;
+                        }
+                    }else{
+                        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
+                                && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
+                            hasPermissions = true;
+                            hasAudioPermissions = false;
+                        }
                     }
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // SDK 33
-                    if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
-                            && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
-                        hasPermissions = true;
+                    if (isAudioEnabled) {
+                        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
+                                && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
+                            hasPermissions = true;
+                            hasAudioPermissions = true;
+                        }
+                    }else{
+                        if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)) {
+                            hasPermissions = true;
+                        }
                     }
+
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
                         hasPermissions = true;
+                        hasAudioPermissions = true;
+
                     }
                 } else {
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
                             && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
                         hasPermissions = true;
+                        hasAudioPermissions = true;
                     }
                 }
 
@@ -230,7 +251,9 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                         startbtn.setText(R.string.start_recording);
                     } else {
                         // else start recording
-                        startRecordingScreen();
+                        if (hasAudioPermissions && isAudioEnabled) {
+                            startRecordingScreen();
+                        }
                     }
                 }
             } else {
@@ -585,7 +608,11 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         switch (requestCode) {
             case PERMISSION_REQ_POST_NOTIFICATIONS:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO);
+                    if (isAudioEnabled) {
+                        checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO);
+                    }else {
+                        checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
+                    }
                 } else {
                     hasPermissions = false;
                     showLongToast("No permission for " + Manifest.permission.POST_NOTIFICATIONS);

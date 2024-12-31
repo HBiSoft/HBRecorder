@@ -161,15 +161,19 @@ public class ScreenRecordService extends Service {
                 videoBitrate = intent.getIntExtra("videoBitrate", 40000000);
 
                 if (audioSource != null) {
-                    setAudioSourceAsInt(audioSource);
+                    if (isAudioEnabled) {
+                        setAudioSourceAsInt(audioSource);
+                    }
                 }
                 if (videoEncoder != null) {
                     setvideoEncoderAsInt(videoEncoder);
                 }
 
                 filePath = name;
-                audioBitrate = intent.getIntExtra("audioBitrate", 128000);
-                audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
+                if (isAudioEnabled) {
+                    audioBitrate = intent.getIntExtra("audioBitrate", 128000);
+                    audioSamplingRate = intent.getIntExtra("audioSamplingRate", 44100);
+                }
                 outputFormat = intent.getStringExtra("outputFormat");
                 if (outputFormat != null) {
                     setOutputFormatAsInt(outputFormat);
@@ -183,11 +187,15 @@ public class ScreenRecordService extends Service {
                 }
                 //Set notification bitrate if developer did not
                 if (audioBitrate == 0) {
-                    audioBitrate = 128000;
+                    if (isAudioEnabled) {
+                        audioBitrate = 128000;
+                    }
                 }
                 //Set notification sampling rate if developer did not
                 if (audioSamplingRate == 0) {
-                    audioSamplingRate = 44100;
+                    if (isAudioEnabled) {
+                        audioSamplingRate = 44100;
+                    }
                 }
                 //Set notification title if developer did not
                 if (notificationTitle == null || notificationTitle.equals("")) {
@@ -616,7 +624,11 @@ public class ScreenRecordService extends Service {
 
     private void startFgs(int notificationId, Notification notificaton) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
-            startForeground(notificationId, notificaton, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION | ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);
+            if (isAudioEnabled){
+                startForeground(notificationId, notificaton, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION | ServiceInfo.FOREGROUND_SERVICE_TYPE_MICROPHONE);
+            }else {
+                startForeground(notificationId, notificaton, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+            }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(notificationId, notificaton, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
         } else {
