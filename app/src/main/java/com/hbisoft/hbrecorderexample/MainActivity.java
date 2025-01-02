@@ -197,6 +197,18 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         custom_settings_switch = findViewById(R.id.custom_settings_switch);
     }
 
+    private void saveAudioPreference(boolean isEnabled) {
+        SharedPreferences preferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("hasAudioPermissions", isEnabled);
+        editor.apply();
+    }
+
+    private boolean hasAudioPreference() {
+        SharedPreferences preferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
+        return preferences.getBoolean("hasAudioPermissions", false); // Default to false if not set
+    }
+
     //Start Button OnClickListener
     private void setOnClickListeners() {
         startbtn.setOnClickListener(v -> {
@@ -208,13 +220,13 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                                 && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
                                 && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
                             hasPermissions = true;
-                            hasAudioPermissions = true;
+                            saveAudioPreference(true);
                         }
                     }else{
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
                                 && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
                             hasPermissions = true;
-                            hasAudioPermissions = false;
+                            saveAudioPreference(false);
                         }
                     }
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // SDK 33
@@ -222,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
                                 && checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
                             hasPermissions = true;
-                            hasAudioPermissions = true;
+                            saveAudioPreference(true);
                         }
                     }else{
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)) {
@@ -233,14 +245,14 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
                         hasPermissions = true;
-                        hasAudioPermissions = true;
+                        saveAudioPreference(true);
 
                     }
                 } else {
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)
                             && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
                         hasPermissions = true;
-                        hasAudioPermissions = true;
+                        saveAudioPreference(true);
                     }
                 }
 
@@ -251,7 +263,14 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                         startbtn.setText(R.string.start_recording);
                     } else {
                         // else start recording
-                        if (hasAudioPermissions && isAudioEnabled) {
+                        if (!hasAudioPermissions && isAudioEnabled) {
+                            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)){
+                                hasPermissions = true;
+                                saveAudioPreference(true);
+                                startRecordingScreen();
+                            }
+
+                        }else {
                             startRecordingScreen();
                         }
                     }
@@ -665,6 +684,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     //Start screen recording
                     hbRecorder.startScreenRecording(data, resultCode);
 
+                }else{
+                    startbtn.setText(R.string.start_recording);
                 }
             }
         }
