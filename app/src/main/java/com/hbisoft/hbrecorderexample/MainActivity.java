@@ -1,5 +1,9 @@
 package com.hbisoft.hbrecorderexample;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_REACHED_ERROR;
+import static com.hbisoft.hbrecorder.Constants.SETTINGS_ERROR;
+
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -20,19 +24,18 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.RadioGroup;
-import androidx.appcompat.widget.SwitchCompat;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -48,10 +51,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static com.hbisoft.hbrecorder.Constants.MAX_FILE_SIZE_REACHED_ERROR;
-import static com.hbisoft.hbrecorder.Constants.SETTINGS_ERROR;
 
 
 /**
@@ -151,8 +150,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                 Log.e("HBRecorderCodecInfo", "defaultVideoEncoder for (" + mMimeType + ") -> " + defaultVideoEncoder);
                 Log.e("HBRecorderCodecInfo", "MaxSupportedFrameRate -> " + hbRecorderCodecInfo.getMaxSupportedFrameRate(mWidth, mHeight, mMimeType));
                 Log.e("HBRecorderCodecInfo", "MaxSupportedBitrate -> " + hbRecorderCodecInfo.getMaxSupportedBitrate(mMimeType));
-                Log.e("HBRecorderCodecInfo", "isSizeAndFramerateSupported @ Width = "+mWidth+" Height = "+mHeight+" FPS = "+mFPS+" -> " + isSizeAndFramerateSupported);
-                Log.e("HBRecorderCodecInfo", "isSizeSupported @ Width = "+mWidth+" Height = "+mHeight+" -> " + hbRecorderCodecInfo.isSizeSupported(mWidth, mHeight, mMimeType));
+                Log.e("HBRecorderCodecInfo", "isSizeAndFramerateSupported @ Width = " + mWidth + " Height = " + mHeight + " FPS = " + mFPS + " -> " + isSizeAndFramerateSupported);
+                Log.e("HBRecorderCodecInfo", "isSizeSupported @ Width = " + mWidth + " Height = " + mHeight + " -> " + hbRecorderCodecInfo.isSizeSupported(mWidth, mHeight, mMimeType));
                 Log.e("HBRecorderCodecInfo", "Default Video Format = " + hbRecorderCodecInfo.getDefaultVideoFormat());
 
                 HashMap<String, String> supportedVideoMimeTypes = hbRecorderCodecInfo.getSupportedVideoMimeTypes();
@@ -169,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                 for (int j = 0; j < supportedVideoFormats.size(); j++) {
                     Log.e("HBRecorderCodecInfo", "Available Video Formats : " + supportedVideoFormats.get(j));
                 }
-            }else{
+            } else {
                 Log.e("HBRecorderCodecInfo", "MimeType not supported");
             }
 
@@ -222,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                             hasPermissions = true;
                             saveAudioPreference(true);
                         }
-                    }else{
+                    } else {
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)
                                 && checkSelfPermission(Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION, PERMISSION_REQ_ID_FOREGROUND_SERVICE_MEDIA_PROJECTION)) {
                             hasPermissions = true;
@@ -236,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                             hasPermissions = true;
                             saveAudioPreference(true);
                         }
-                    }else{
+                    } else {
                         if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS, PERMISSION_REQ_POST_NOTIFICATIONS)) {
                             hasPermissions = true;
                         }
@@ -264,13 +263,13 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     } else {
                         // else start recording
                         if (!hasAudioPermissions && isAudioEnabled) {
-                            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)){
+                            if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO)) {
                                 hasPermissions = true;
                                 saveAudioPreference(true);
                                 startRecordingScreen();
                             }
 
-                        }else {
+                        } else {
                             startRecordingScreen();
                         }
                     }
@@ -324,12 +323,12 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //Update gallery depending on SDK Level
             if (hbRecorder.wasUriSet()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     updateGalleryUri();
                 } else {
                     refreshGalleryFile();
                 }
-            }else{
+            } else {
                 refreshGalleryFile();
             }
         }
@@ -348,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
         if (errorCode == SETTINGS_ERROR) {
             showLongToast(getString(R.string.settings_not_supported_message));
-        } else if ( errorCode == MAX_FILE_SIZE_REACHED_ERROR) {
+        } else if (errorCode == MAX_FILE_SIZE_REACHED_ERROR) {
             showLongToast(getString(R.string.max_file_size_reached_message));
         } else {
             showLongToast(getString(R.string.general_recording_error_message));
@@ -384,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void updateGalleryUri(){
+    private void updateGalleryUri() {
         contentValues.clear();
         contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
         getContentResolver().update(mUri, contentValues, null, null);
@@ -412,6 +411,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     }
 
     String output_format;
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     // Example of how to set custom settings
     private void customSettings() {
@@ -462,28 +462,8 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             }
         }
 
-        //NOTE - THIS MIGHT NOT BE SUPPORTED SIZES FOR YOUR DEVICE
-        //Video Dimensions
-        String video_resolution = prefs.getString("key_video_resolution", null);
-        if (video_resolution != null) {
-            switch (video_resolution) {
-                case "0":
-                    hbRecorder.setScreenDimensions(426, 240);
-                    break;
-                case "1":
-                    hbRecorder.setScreenDimensions(640, 360);
-                    break;
-                case "2":
-                    hbRecorder.setScreenDimensions(854, 480);
-                    break;
-                case "3":
-                    hbRecorder.setScreenDimensions(1280, 720);
-                    break;
-                case "4":
-                    hbRecorder.setScreenDimensions(1920, 1080);
-                    break;
-            }
-        }
+//       setPrefsCustomDimensions(prefs);
+        setPrefCustomResolution(prefs);
 
         //Video Frame Rate
         String video_frame_rate = prefs.getString("key_video_fps", null);
@@ -562,6 +542,58 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void setPrefCustomResolution(SharedPreferences prefs) {
+        String video_resolution = prefs.getString("key_video_resolution", null);
+        if (video_resolution != null) {
+            switch (video_resolution) {
+                case "0":
+                    hbRecorder.setResolution(426);
+                    break;
+                case "1":
+                    hbRecorder.setResolution(640);
+                    break;
+                case "2":
+                    hbRecorder.setResolution(854);
+                    break;
+                case "3":
+                    hbRecorder.setResolution(1280);
+                    break;
+                case "4":
+                    hbRecorder.setResolution(1920);
+                    break;
+            }
+        }
+    }
+
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void setPrefsCustomDimensions(SharedPreferences prefs) {
+        //NOTE - THIS MIGHT NOT BE SUPPORTED SIZES FOR YOUR DEVICE, AND WILL INTRODUCE BLACK BARS
+        // ON SIDE OF VIDEOS
+        //Video Dimensions
+        String video_resolution = prefs.getString("key_video_resolution", null);
+        if (video_resolution != null) {
+            switch (video_resolution) {
+                case "0":
+                    hbRecorder.setScreenDimensions(426, 240);
+                    break;
+                case "1":
+                    hbRecorder.setScreenDimensions(640, 360);
+                    break;
+                case "2":
+                    hbRecorder.setScreenDimensions(854, 480);
+                    break;
+                case "3":
+                    hbRecorder.setScreenDimensions(1280, 720);
+                    break;
+                case "4":
+                    hbRecorder.setScreenDimensions(1920, 1080);
+                    break;
+            }
+        }
+    }
+
     //Get/Set the selected settings
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void quickSettings() {
@@ -629,7 +661,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (isAudioEnabled) {
                         checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO);
-                    }else {
+                    } else {
                         checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE);
                     }
                 } else {
@@ -684,7 +716,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
                     //Start screen recording
                     hbRecorder.startScreenRecording(data, resultCode);
 
-                }else{
+                } else {
                     startbtn.setText(R.string.start_recording);
                 }
             }
@@ -698,6 +730,7 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
     ContentResolver resolver;
     ContentValues contentValues;
     Uri mUri;
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setOutputPath() {
         String filename = generateFileName();
@@ -709,16 +742,16 @@ public class MainActivity extends AppCompatActivity implements HBRecorderListene
             contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
             if (output_format != null) {
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, getMimeTypeForOutputFormat(output_format));
-            }else {
+            } else {
                 contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
             }
             mUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
             //FILE NAME SHOULD BE THE SAME
             hbRecorder.setFileName(filename);
             hbRecorder.setOutputUri(mUri);
-        }else{
+        } else {
             createFolder();
-            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
+            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) + "/HBRecorder");
         }
     }
 

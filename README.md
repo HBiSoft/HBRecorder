@@ -212,6 +212,10 @@ Then you can set the following:
 hbRecorder.setAudioSource(String);
 //MUST BE ONE OF THE FOLLOWING - https://developer.android.com/reference/android/media/MediaRecorder.VideoEncoder.html
 hbRecorder.setVideoEncoder(String);
+//Use this If you want to set resolution of the video like 720 or 1080 etc. for example if you want your video to 
+//be of 1920x1080 then pass 1920 to this function it will calculate the width according to device resolution,
+//while maintaining the aspect ratio.
+hbRecorder.setResolution(HeightInPx);
 //If nothing is provided, it will select the highest value supported by your device
 hbRecorder.setScreenDimensions(HeightInPx, WidthInPx);
 //Frame rate is device dependent

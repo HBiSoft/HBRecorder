@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="pref_video_resolution">
-        <item>426x240</item>
-        <item>640x360</item>
-        <item>854x480</item>
-        <item>1280x720</item>
-        <item>1920x1080</item>
+        <item>240p</item>
+        <item>360p</item>
+        <item>480p</item>
+        <item>720p</item>
+        <item>1080p</item>
         <item>Default</item>
     </string-array>
     <string-array name="pref_video_framerate">
