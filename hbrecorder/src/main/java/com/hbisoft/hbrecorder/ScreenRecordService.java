@@ -506,7 +506,7 @@ public class ScreenRecordService extends Service {
             mMediaProjection.registerCallback(new MediaProjection.Callback() {
                 @Override
                 public void onStop() {
-                    super.onStop();
+                    stopSelf();
                 }
             }, handler);
         } else {
