@@ -51,6 +51,7 @@ import static com.hbisoft.hbrecorder.Constants.ON_RESUME;
 import static com.hbisoft.hbrecorder.Constants.ON_RESUME_KEY;
 import static com.hbisoft.hbrecorder.Constants.ON_START;
 import static com.hbisoft.hbrecorder.Constants.ON_START_KEY;
+import static com.hbisoft.hbrecorder.Constants.PROJECTION_STOPPED_ERROR;
 import static com.hbisoft.hbrecorder.Constants.SETTINGS_ERROR;
 
 /**
@@ -93,6 +94,7 @@ public class ScreenRecordService extends Service {
     public final static String BUNDLED_LISTENER = "listener";
     private Uri returnedUri = null;
     private Intent mIntent;
+    private MediaProjection.Callback mProjectionCallback;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -291,6 +293,13 @@ public class ScreenRecordService extends Service {
                     if (receiver != null) {
                         receiver.send(Activity.RESULT_OK, bundle);
                     }
+                }
+
+                if (mMediaRecorder == null || mMediaProjection == null || mVirtualDisplay == null) {
+                    // Failed projection must not reach MediaRecorder.start(), the encoder would run
+                    // on a surface nothing feeds and ON_START would be sent for an empty recording
+                    stopSelf();
+                    return Service.START_NOT_STICKY;
                 }
 
                 mMediaRecorder.setOnErrorListener(new MediaRecorder.OnErrorListener() {
@@ -501,20 +510,43 @@ public class ScreenRecordService extends Service {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void initMediaProjection() {
         mMediaProjection = ((MediaProjectionManager) Objects.requireNonNull(getSystemService(Context.MEDIA_PROJECTION_SERVICE))).getMediaProjection(mResultCode, mResultData);
+        mProjectionCallback = new MediaProjection.Callback() {
+            @Override
+            public void onStop() {
+                onProjectionStopped();
+            }
+        };
         Handler handler = new Handler(Looper.getMainLooper());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            mMediaProjection.registerCallback(new MediaProjection.Callback() {
-                @Override
-                public void onStop() {
-                    super.onStop();
-                }
-            }, handler);
-        } else {
-            mMediaProjection.registerCallback(new MediaProjection.Callback() {
-                // Nothing
-                // We don't use it but register it to avoid runtime error from SDK 34+.
-            }, handler);
+        mMediaProjection.registerCallback(mProjectionCallback, handler);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void onProjectionStopped() {
+        if (mMediaProjection == null) {
+            return;
         }
+
+        mMediaProjection = null;
+        if (mVirtualDisplay != null) {
+            mVirtualDisplay.release();
+            mVirtualDisplay = null;
+        }
+        sendError(PROJECTION_STOPPED_ERROR, "MediaProjection was stopped by the system or the user");
+        stopSelf();
+    }
+
+    private void sendError(int errorCode, String reason) {
+        if (mIntent == null) {
+            return;
+        }
+        ResultReceiver receiver = mIntent.getParcelableExtra(ScreenRecordService.BUNDLED_LISTENER);
+        if (receiver == null) {
+            return;
+        }
+        Bundle bundle = new Bundle();
+        bundle.putInt(ERROR_KEY, errorCode);
+        bundle.putString(ERROR_REASON_KEY, reason);
+        receiver.send(Activity.RESULT_OK, bundle);
     }
 
     //Return the output file path as string
@@ -668,6 +700,10 @@ public class ScreenRecordService extends Service {
             mMediaRecorder.reset();
         }
         if (mMediaProjection != null) {
+            if (mProjectionCallback != null) {
+                mMediaProjection.unregisterCallback(mProjectionCallback);
+                mProjectionCallback = null;
+            }
             mMediaProjection.stop();
             mMediaProjection = null;
         }

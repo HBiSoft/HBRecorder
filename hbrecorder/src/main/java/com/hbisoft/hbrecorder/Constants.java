@@ -15,5 +15,6 @@ public class Constants {
     public final static int MAX_FILE_SIZE_REACHED_ERROR = 48;
     public final static int GENERAL_ERROR = 100;
     public final static int ON_START = 111;
+    public final static int PROJECTION_STOPPED_ERROR = 200;
     public final static int NO_SPECIFIED_MAX_SIZE = 0;
 }
